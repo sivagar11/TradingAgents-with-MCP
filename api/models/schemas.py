@@ -49,6 +49,9 @@ class AgentUpdate(BaseModel):
     message: Optional[str] = None
     report: Optional[str] = None
     timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
+    duration_seconds: Optional[float] = None
+    start_time: Optional[str] = None
+    end_time: Optional[str] = None
 
 
 class DebateUpdate(BaseModel):
