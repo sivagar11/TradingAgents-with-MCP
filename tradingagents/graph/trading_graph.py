@@ -61,15 +61,43 @@ class TradingAgentsGraph:
         config: Dict[str, Any] = None,
     ):
         """Initialize the trading agents graph and components.
+        
+        NOTE: This is the synchronous constructor. For MCP support, use the async
+        factory method `create()` instead:
+            graph = await TradingAgentsGraph.create(...)
 
         Args:
             selected_analysts: List of analyst types to include
             debug: Whether to run in debug mode
             config: Configuration dictionary. If None, uses default config
         """
+        self.selected_analysts = selected_analysts
         self.debug = debug
         self.config = config or DEFAULT_CONFIG
-
+        
+        # MCP will be initialized asynchronously if needed
+        self.mcp_client = None
+        self.use_mcp = self.config.get("use_mcp", False)
+        
+        # These will be set by _initialize_sync() or async create()
+        self.deep_thinking_llm = None
+        self.quick_thinking_llm = None
+        self.tool_nodes = None
+        self.graph = None
+        
+        # If MCP is enabled, user must use create() factory method
+        if self.use_mcp:
+            raise RuntimeError(
+                "Cannot use MCP with synchronous __init__. "
+                "Use async factory method instead:\n"
+                "    graph = await TradingAgentsGraph.create(..., config={'use_mcp': True})"
+            )
+        
+        # For non-MCP mode, initialize synchronously
+        self._initialize_sync()
+    
+    def _initialize_sync(self):
+        """Synchronous initialization (non-MCP mode)."""
         # Update the interface's config
         set_config(self.config)
 
@@ -99,17 +127,7 @@ class TradingAgentsGraph:
         self.invest_judge_memory = FinancialSituationMemory("invest_judge_memory", self.config)
         self.risk_manager_memory = FinancialSituationMemory("risk_manager_memory", self.config)
 
-        # Initialize MCP if enabled
-        self.mcp_client = None
-        self.use_mcp = self.config.get("use_mcp", False)
-        if self.use_mcp:
-            if not MCP_AVAILABLE:
-                raise RuntimeError("MCP is enabled but required libraries are not installed. Run: pip install mcp fastmcp")
-            print("MCP: Initializing MCP client...")
-            self.mcp_client = self._initialize_mcp()
-            print("MCP: Client initialized successfully")
-
-        # Create tool nodes (MCP or direct, based on config)
+        # Create tool nodes (direct mode only)
         self.tool_nodes = self._create_tool_nodes()
 
         # Initialize components
@@ -136,12 +154,116 @@ class TradingAgentsGraph:
         self.log_states_dict = {}  # date to full state dict
 
         # Set up the graph
-        self.graph = self.graph_setup.setup_graph(selected_analysts)
-
-    def _initialize_mcp(self) -> MCPClient:
-        """Initialize MCP client and connect to servers."""
-        import asyncio
+        self.graph = self.graph_setup.setup_graph(self.selected_analysts)
+    
+    @classmethod
+    async def create(
+        cls,
+        selected_analysts=["market", "social", "news", "fundamentals"],
+        debug=False,
+        config: Dict[str, Any] = None,
+    ):
+        """Async factory method to create TradingAgentsGraph with MCP support.
         
+        Use this instead of __init__ when MCP is enabled:
+            graph = await TradingAgentsGraph.create(
+                selected_analysts=["market"],
+                config={"use_mcp": True, ...}
+            )
+        
+        Args:
+            selected_analysts: List of analyst types to include
+            debug: Whether to run in debug mode
+            config: Configuration dictionary. If None, uses default config
+            
+        Returns:
+            Fully initialized TradingAgentsGraph instance
+        """
+        # Create instance without full initialization
+        instance = cls.__new__(cls)
+        instance.selected_analysts = selected_analysts
+        instance.debug = debug
+        instance.config = config or DEFAULT_CONFIG
+        instance.use_mcp = instance.config.get("use_mcp", False)
+        instance.mcp_client = None
+        
+        # Update the interface's config
+        set_config(instance.config)
+
+        # Create necessary directories
+        os.makedirs(
+            os.path.join(instance.config["project_dir"], "dataflows/data_cache"),
+            exist_ok=True,
+        )
+
+        # Initialize LLMs
+        if instance.config["llm_provider"].lower() == "openai" or instance.config["llm_provider"] == "ollama" or instance.config["llm_provider"] == "openrouter":
+            instance.deep_thinking_llm = ChatOpenAI(model=instance.config["deep_think_llm"], base_url=instance.config["backend_url"])
+            instance.quick_thinking_llm = ChatOpenAI(model=instance.config["quick_think_llm"], base_url=instance.config["backend_url"])
+        elif instance.config["llm_provider"].lower() == "anthropic":
+            instance.deep_thinking_llm = ChatAnthropic(model=instance.config["deep_think_llm"], base_url=instance.config["backend_url"])
+            instance.quick_thinking_llm = ChatAnthropic(model=instance.config["quick_think_llm"], base_url=instance.config["backend_url"])
+        elif instance.config["llm_provider"].lower() == "google":
+            instance.deep_thinking_llm = ChatGoogleGenerativeAI(model=instance.config["deep_think_llm"])
+            instance.quick_thinking_llm = ChatGoogleGenerativeAI(model=instance.config["quick_think_llm"])
+        else:
+            raise ValueError(f"Unsupported LLM provider: {instance.config['llm_provider']}")
+        
+        # Initialize memories
+        instance.bull_memory = FinancialSituationMemory("bull_memory", instance.config)
+        instance.bear_memory = FinancialSituationMemory("bear_memory", instance.config)
+        instance.trader_memory = FinancialSituationMemory("trader_memory", instance.config)
+        instance.invest_judge_memory = FinancialSituationMemory("invest_judge_memory", instance.config)
+        instance.risk_manager_memory = FinancialSituationMemory("risk_manager_memory", instance.config)
+
+        # Initialize MCP if enabled (ASYNC)
+        if instance.use_mcp:
+            if not MCP_AVAILABLE:
+                raise RuntimeError("MCP is enabled but required libraries are not installed. Run: pip install mcp fastmcp")
+            print("MCP: Initializing MCP client (async)...")
+            instance.mcp_client = await instance._initialize_mcp_async()
+            print("MCP: Client initialized successfully")
+
+        # Create tool nodes (MCP or direct, based on config)
+        instance.tool_nodes = instance._create_tool_nodes()
+
+        # Initialize components
+        instance.conditional_logic = ConditionalLogic()
+        instance.graph_setup = GraphSetup(
+            instance.quick_thinking_llm,
+            instance.deep_thinking_llm,
+            instance.tool_nodes,
+            instance.bull_memory,
+            instance.bear_memory,
+            instance.trader_memory,
+            instance.invest_judge_memory,
+            instance.risk_manager_memory,
+            instance.conditional_logic,
+        )
+
+        instance.propagator = Propagator()
+        instance.reflector = Reflector(instance.quick_thinking_llm)
+        instance.signal_processor = SignalProcessor(instance.quick_thinking_llm)
+
+        # State tracking
+        instance.curr_state = None
+        instance.ticker = None
+        instance.log_states_dict = {}  # date to full state dict
+
+        # Set up the graph
+        instance.graph = instance.graph_setup.setup_graph(instance.selected_analysts)
+        
+        return instance
+
+    async def _initialize_mcp_async(self) -> MCPClient:
+        """Initialize MCP client and connect to servers (ASYNC).
+        
+        This must be called from an async context to properly manage
+        the MCP client connections and event loops.
+        
+        Returns:
+            Initialized MCPClient with active server connections
+        """
         # Create MCP client
         client = MCPClient()
         
@@ -153,8 +275,8 @@ class TradingAgentsGraph:
                 server_config.get("args", [])
             )
         
-        # Connect to all servers (synchronous wrapper for async)
-        asyncio.run(client.connect_all())
+        # Connect to all servers (ASYNC - no asyncio.run wrapper!)
+        await client.connect_all()
         
         return client
     
