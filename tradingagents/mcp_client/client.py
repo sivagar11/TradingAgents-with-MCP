@@ -48,30 +48,39 @@ class MCPClient:
             await self.connect_server(name, config)
         self._initialized = True
     
-    async def connect_server(self, name: str, config: StdioServerParameters):
-        """Connect to a specific MCP server."""
+    async def connect_server(self, name: str, config: StdioServerParameters, timeout: int = 30):
+        """Connect to a specific MCP server with timeout."""
         try:
-            print(f"MCP: Connecting to '{name}' server...")
+            print(f"MCP: Connecting to '{name}' server (timeout: {timeout}s)...")
             
-            # Create stdio client as context manager
-            stdio_ctx = stdio_client(config)
+            # Wrap connection in timeout
+            async with asyncio.timeout(timeout):
+                # Create stdio client as context manager
+                stdio_ctx = stdio_client(config)
+                
+                print(f"MCP: Starting server process...")
+                # Enter context and get streams
+                read_stream, write_stream = await stdio_ctx.__aenter__()
+                
+                print(f"MCP: Initializing session...")
+                # Create and initialize session
+                session = ClientSession(read_stream, write_stream)
+                init_result = await session.initialize()
+                
+                # Store session and context manager (need ctx for cleanup)
+                self.sessions[name] = (session, stdio_ctx)
+                
+                print(f"MCP: Listing tools...")
+                # List available tools (for debugging)
+                tools_result = await session.list_tools()
+                print(f"MCP: ✅ Connected to '{name}' server with {len(tools_result.tools)} tools")
+                for tool in tools_result.tools:
+                    print(f"MCP:    - {tool.name}")
             
-            # Enter context and get streams
-            read_stream, write_stream = await stdio_ctx.__aenter__()
-            
-            # Create and initialize session
-            session = ClientSession(read_stream, write_stream)
-            init_result = await session.initialize()
-            
-            # Store session and context manager (need ctx for cleanup)
-            self.sessions[name] = (session, stdio_ctx)
-            
-            # List available tools (for debugging)
-            tools_result = await session.list_tools()
-            print(f"MCP: ✅ Connected to '{name}' server with {len(tools_result.tools)} tools")
-            for tool in tools_result.tools:
-                print(f"MCP:    - {tool.name}")
-            
+        except asyncio.TimeoutError:
+            print(f"MCP: ❌ Connection to '{name}' server timed out after {timeout}s")
+            print(f"MCP: This usually means the server is not responding properly")
+            raise
         except Exception as e:
             print(f"MCP: ❌ Failed to connect to '{name}' server: {e}")
             import traceback
