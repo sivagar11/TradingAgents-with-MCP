@@ -40,10 +40,13 @@ class MCPClient:
             command: Command to start server (e.g., 'python')
             args: Command arguments (e.g., ['path/to/server.py'])
         """
+        import os
+        
+        # Pass parent process environment to subprocess so it has access to API keys
         self.server_configs[name] = StdioServerParameters(
             command=command,
             args=args or [],
-            env=None
+            env=os.environ.copy()  # ✅ FIX: Inherit environment variables
         )
     
     async def connect_all(self):

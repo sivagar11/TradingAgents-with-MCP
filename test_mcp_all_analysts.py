@@ -42,13 +42,8 @@ config.update({
     "quick_think_llm": "gpt-4o-mini",
     "max_debate_rounds": 0,
     "max_risk_discuss_rounds": 0,
-    # Use yfinance for all data (no API keys required)
-    "data_vendors": {
-        "core_stock_apis": "yfinance",
-        "technical_indicators": "yfinance",
-        "fundamental_data": "yfinance",  # Changed from alpha_vantage
-        "news_data": "yfinance",  # Changed from alpha_vantage
-    },
+    # Use DEFAULT_CONFIG vendors for fair comparison with DIRECT mode
+    # (no vendor overrides - uses openai for fundamentals/news)
 })
 
 print("📊 Configuration:")

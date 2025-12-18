@@ -36,13 +36,8 @@ config.update({
     "quick_think_llm": "gpt-4o-mini",
     "max_debate_rounds": 0,
     "max_risk_discuss_rounds": 0,
-    # Use yfinance for fundamentals (no API key needed)
-    "data_vendors": {
-        "core_stock_apis": "yfinance",
-        "technical_indicators": "yfinance",
-        "fundamental_data": "yfinance",
-        "news_data": "yfinance",
-    },
+    # Use DEFAULT_CONFIG vendors for fair comparison with DIRECT mode
+    # (no vendor overrides - uses openai for fundamentals/news)
 })
 
 print("📊 Configuration:")
@@ -50,7 +45,7 @@ print(f"   Mode: MCP")
 print(f"   Ticker: {TICKER}")
 print(f"   Date: {DATE}")
 print(f"   Analyst: Fundamentals only")
-print(f"   Fundamentals Vendor: yfinance")
+print(f"   Data Vendors: Using DEFAULT_CONFIG (same as DIRECT mode for comparison)")
 print()
 
 async def run_test():

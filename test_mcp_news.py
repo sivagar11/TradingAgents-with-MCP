@@ -37,13 +37,8 @@ config.update({
     "quick_think_llm": "gpt-4o-mini",
     "max_debate_rounds": 0,
     "max_risk_discuss_rounds": 0,
-    # Try different data vendors if alpha_vantage fails
-    "data_vendors": {
-        "core_stock_apis": "yfinance",
-        "technical_indicators": "yfinance",
-        "fundamental_data": "yfinance",
-        "news_data": "openai",  # Use OpenAI for news (more reliable)
-    },
+    # Use DEFAULT_CONFIG vendors for fair comparison with DIRECT mode
+    # (no vendor overrides - uses openai for news)
 })
 
 print("📊 Configuration:")
@@ -51,7 +46,7 @@ print(f"   Mode: MCP")
 print(f"   Ticker: {TICKER}")
 print(f"   Date: {DATE}")
 print(f"   Analyst: News only")
-print(f"   News Vendor: OpenAI")
+print(f"   Data Vendors: Using DEFAULT_CONFIG (same as DIRECT mode for comparison)")
 print()
 
 async def run_test():
