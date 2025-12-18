@@ -42,6 +42,13 @@ config.update({
     "quick_think_llm": "gpt-4o-mini",
     "max_debate_rounds": 0,
     "max_risk_discuss_rounds": 0,
+    # Use yfinance for all data (no API keys required)
+    "data_vendors": {
+        "core_stock_apis": "yfinance",
+        "technical_indicators": "yfinance",
+        "fundamental_data": "yfinance",  # Changed from alpha_vantage
+        "news_data": "yfinance",  # Changed from alpha_vantage
+    },
 })
 
 print("📊 Configuration:")
