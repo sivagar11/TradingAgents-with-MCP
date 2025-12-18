@@ -41,12 +41,44 @@ DEFAULT_CONFIG = {
                 "mcp_servers/stock_server/server.py"
             )]
         },
-        # Future: add news, fundamentals, social servers here
+        "news": {
+            "command": "python",
+            "args": [os.path.join(
+                os.path.abspath(os.path.join(os.path.dirname(__file__), ".")),
+                "mcp_servers/news_server/server.py"
+            )]
+        },
+        "fundamentals": {
+            "command": "python",
+            "args": [os.path.join(
+                os.path.abspath(os.path.join(os.path.dirname(__file__), ".")),
+                "mcp_servers/fundamentals_server/server.py"
+            )]
+        },
+        "social": {
+            "command": "python",
+            "args": [os.path.join(
+                os.path.abspath(os.path.join(os.path.dirname(__file__), ".")),
+                "mcp_servers/social_server/server.py"
+            )]
+        },
     },
     "mcp_tool_mapping": {
         # Maps tool names to MCP server names
+        # Stock tools
         "get_stock_data": "stock",
         "get_indicators": "stock",
-        # Future: add more tool mappings
+        # News tools
+        "get_news": "news",
+        "get_global_news": "news",
+        "get_insider_sentiment": "news",
+        "get_insider_transactions": "news",
+        # Fundamentals tools
+        "get_fundamentals": "fundamentals",
+        "get_balance_sheet": "fundamentals",
+        "get_cashflow": "fundamentals",
+        "get_income_statement": "fundamentals",
+        # Social tools (uses news server)
+        # Note: social analyst uses get_news, already mapped above
     },
 }
