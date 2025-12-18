@@ -10,7 +10,8 @@ load_dotenv()
 config = DEFAULT_CONFIG.copy()
 config["deep_think_llm"] = "gpt-4o-mini"  # Use a different model
 config["quick_think_llm"] = "gpt-4o-mini"  # Use a different model
-config["max_debate_rounds"] = 1  # Increase debate rounds
+config["max_debate_rounds"] = 0  # Skip debate rounds for faster demo
+config["max_risk_discuss_rounds"] = 0  # Skip risk debate for faster demo
 
 # Configure data vendors (default uses yfinance and alpha_vantage)
 config["data_vendors"] = {
