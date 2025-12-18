@@ -30,4 +30,23 @@ DEFAULT_CONFIG = {
         # Example: "get_stock_data": "alpha_vantage",  # Override category default
         # Example: "get_news": "openai",               # Override category default
     },
+    # MCP (Model Context Protocol) Configuration
+    "use_mcp": False,  # Toggle to use MCP servers instead of direct tool calls (for research comparison)
+    "mcp_servers": {
+        # MCP server configurations (only used if use_mcp=True)
+        "stock": {
+            "command": "python",
+            "args": [os.path.join(
+                os.path.abspath(os.path.join(os.path.dirname(__file__), ".")),
+                "mcp_servers/stock_server/server.py"
+            )]
+        },
+        # Future: add news, fundamentals, social servers here
+    },
+    "mcp_tool_mapping": {
+        # Maps tool names to MCP server names
+        "get_stock_data": "stock",
+        "get_indicators": "stock",
+        # Future: add more tool mappings
+    },
 }

@@ -1,0 +1,11 @@
+# MCP (Model Context Protocol) Dependencies
+# Install with: pip install -r requirements-mcp.txt
+
+# Core MCP libraries
+mcp>=1.0.0
+fastmcp>=0.2.0
+
+# These are already in main requirements.txt but listed here for reference
+# langchain-core>=0.1.0
+# langgraph>=0.0.40
+

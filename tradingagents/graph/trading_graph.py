@@ -42,6 +42,14 @@ from .propagation import Propagator
 from .reflection import Reflector
 from .signal_processing import SignalProcessor
 
+# MCP imports (optional, only used if use_mcp=True)
+try:
+    from tradingagents.mcp_client import MCPClient, MCPToolExecutor
+    MCP_AVAILABLE = True
+except ImportError:
+    MCP_AVAILABLE = False
+    print("MCP: Libraries not available. Install with: pip install mcp fastmcp")
+
 
 class TradingAgentsGraph:
     """Main class that orchestrates the trading agents framework."""
@@ -91,7 +99,17 @@ class TradingAgentsGraph:
         self.invest_judge_memory = FinancialSituationMemory("invest_judge_memory", self.config)
         self.risk_manager_memory = FinancialSituationMemory("risk_manager_memory", self.config)
 
-        # Create tool nodes
+        # Initialize MCP if enabled
+        self.mcp_client = None
+        self.use_mcp = self.config.get("use_mcp", False)
+        if self.use_mcp:
+            if not MCP_AVAILABLE:
+                raise RuntimeError("MCP is enabled but required libraries are not installed. Run: pip install mcp fastmcp")
+            print("MCP: Initializing MCP client...")
+            self.mcp_client = self._initialize_mcp()
+            print("MCP: Client initialized successfully")
+
+        # Create tool nodes (MCP or direct, based on config)
         self.tool_nodes = self._create_tool_nodes()
 
         # Initialize components
@@ -120,42 +138,77 @@ class TradingAgentsGraph:
         # Set up the graph
         self.graph = self.graph_setup.setup_graph(selected_analysts)
 
+    def _initialize_mcp(self) -> MCPClient:
+        """Initialize MCP client and connect to servers."""
+        import asyncio
+        
+        # Create MCP client
+        client = MCPClient()
+        
+        # Register servers from config
+        for server_name, server_config in self.config.get("mcp_servers", {}).items():
+            client.register_server(
+                server_name,
+                server_config["command"],
+                server_config.get("args", [])
+            )
+        
+        # Connect to all servers (synchronous wrapper for async)
+        asyncio.run(client.connect_all())
+        
+        return client
+    
     def _create_tool_nodes(self) -> Dict[str, ToolNode]:
-        """Create tool nodes for different data sources using abstract methods."""
-        return {
-            "market": ToolNode(
-                [
-                    # Core stock data tools
-                    get_stock_data,
-                    # Technical indicators
-                    get_indicators,
-                ]
-            ),
-            "social": ToolNode(
-                [
-                    # News tools for social media analysis
-                    get_news,
-                ]
-            ),
-            "news": ToolNode(
-                [
-                    # News and insider information
-                    get_news,
-                    get_global_news,
-                    get_insider_sentiment,
-                    get_insider_transactions,
-                ]
-            ),
-            "fundamentals": ToolNode(
-                [
-                    # Fundamental analysis tools
-                    get_fundamentals,
-                    get_balance_sheet,
-                    get_cashflow,
-                    get_income_statement,
-                ]
-            ),
-        }
+        """Create tool nodes for different data sources using abstract methods or MCP."""
+        
+        if self.use_mcp and self.mcp_client:
+            # MCP MODE: Create MCP tool executors
+            print("MCP: Creating MCP-powered tool nodes")
+            tool_mapping = self.config.get("mcp_tool_mapping", {})
+            
+            return {
+                "market": MCPToolExecutor(self.mcp_client, tool_mapping),
+                "social": MCPToolExecutor(self.mcp_client, tool_mapping),
+                "news": MCPToolExecutor(self.mcp_client, tool_mapping),
+                "fundamentals": MCPToolExecutor(self.mcp_client, tool_mapping),
+            }
+        else:
+            # DIRECT MODE: Use traditional ToolNodes (original system)
+            print("DIRECT: Using traditional tool nodes (non-MCP)")
+            return {
+                "market": ToolNode(
+                    [
+                        # Core stock data tools
+                        get_stock_data,
+                        # Technical indicators
+                        get_indicators,
+                    ]
+                ),
+                "social": ToolNode(
+                    [
+                        # News tools for social media analysis
+                        get_news,
+                    ]
+                ),
+                "news": ToolNode(
+                    [
+                        # News and insider information
+                        get_news,
+                        get_global_news,
+                        get_insider_sentiment,
+                        get_insider_transactions,
+                    ]
+                ),
+                "fundamentals": ToolNode(
+                    [
+                        # Fundamental analysis tools
+                        get_fundamentals,
+                        get_balance_sheet,
+                        get_cashflow,
+                        get_income_statement,
+                    ]
+                ),
+            }
 
     def propagate(self, company_name, trade_date):
         """Run the trading agents graph for a company on a specific date."""
