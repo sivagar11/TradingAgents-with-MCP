@@ -83,7 +83,7 @@ async def run_test():
     analysis_start = time.time()
 
     try:
-        final_state, signal = graph.propagate(TICKER, DATE)
+        final_state, signal = await graph.propagate(TICKER, DATE)
         analysis_time = time.time() - analysis_start
         print(f"✅ SUCCESS: Analysis completed in {analysis_time:.2f}s")
         print()

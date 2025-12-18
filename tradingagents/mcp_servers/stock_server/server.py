@@ -65,21 +65,21 @@ def suppress_stdout(func):
 @mcp.tool()
 def get_stock_data(
     symbol: str,
-    curr_date: str,
-    look_back_days: int = 30
+    start_date: str,
+    end_date: str
 ) -> str:
     """
     Get historical stock price data for a given ticker symbol.
     
     Args:
         symbol: Stock ticker symbol (e.g., AAPL, NVDA, TSLA)
-        curr_date: Current trading date in YYYY-MM-DD format
-        look_back_days: Number of days to look back for historical data
+        start_date: Start date in YYYY-MM-DD format
+        end_date: End date in YYYY-MM-DD format
     
     Returns:
         Historical OHLCV (Open, High, Low, Close, Volume) data
     """
-    logger.info(f"MCP Tool: get_stock_data({symbol}, {curr_date}, {look_back_days})")
+    logger.info(f"MCP Tool: get_stock_data({symbol}, {start_date}, {end_date})")
     
     # Suppress stdout to prevent corruption of MCP communication
     @suppress_stdout
@@ -87,8 +87,8 @@ def get_stock_data(
         return route_to_vendor(
             "get_stock_data",
             symbol,
-            curr_date,
-            look_back_days
+            start_date,
+            end_date
         )
     
     result = call_vendor()
