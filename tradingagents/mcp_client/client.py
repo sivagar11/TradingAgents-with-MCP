@@ -18,6 +18,8 @@ except ImportError:
         print("ERROR: MCP package not found. Install with: pip install mcp")
 from langchain_core.messages import ToolMessage
 
+from tradingagents.mcp_client.protocol_logger import get_protocol_logger
+
 logger = logging.getLogger(__name__)
 
 
@@ -93,6 +95,12 @@ class MCPClient:
                 logger.info(f"MCP: ✅ Connected to '{name}' with {len(tools_result.tools)} tools")
                 for tool in tools_result.tools:
                     logger.info(f"MCP:    - {tool.name}")
+                
+                # Log to protocol logger if enabled
+                protocol_logger = get_protocol_logger()
+                if protocol_logger:
+                    tool_names = [tool.name for tool in tools_result.tools]
+                    protocol_logger.log_server_init(name, tool_names)
             
         except asyncio.TimeoutError:
             logger.error(f"MCP: ❌ Timeout connecting to '{name}' after {timeout}s")
@@ -122,19 +130,49 @@ class MCPClient:
         
         session = self.sessions[server_name]
         
+        # Log request if protocol logger is enabled
+        protocol_logger = get_protocol_logger()
+        if protocol_logger:
+            protocol_logger.log_tool_call_request(server_name, tool_name, arguments)
+        
         try:
             # Call tool on server
             result = await session.call_tool(tool_name, arguments)
             
             # Extract text content from result
             if result.content and len(result.content) > 0:
-                return result.content[0].text
+                response_text = result.content[0].text
+                
+                # Log response if protocol logger is enabled
+                if protocol_logger:
+                    protocol_logger.log_tool_call_response(
+                        server_name, tool_name, response_text, success=True
+                    )
+                
+                return response_text
             else:
-                return f"No response from {tool_name}"
+                response = f"No response from {tool_name}"
+                
+                # Log response if protocol logger is enabled
+                if protocol_logger:
+                    protocol_logger.log_tool_call_response(
+                        server_name, tool_name, response, success=False,
+                        error="Empty response"
+                    )
+                
+                return response
             
         except Exception as e:
             error_msg = f"MCP tool call failed: {tool_name} on {server_name}: {e}"
             logger.error(error_msg, exc_info=True)
+            
+            # Log error if protocol logger is enabled
+            if protocol_logger:
+                protocol_logger.log_error(server_name, "tool_call_exception", str(e))
+                protocol_logger.log_tool_call_response(
+                    server_name, tool_name, error_msg, success=False, error=str(e)
+                )
+            
             return error_msg
     
     async def list_tools(self, server_name: str) -> List[str]:
