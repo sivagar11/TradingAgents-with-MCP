@@ -41,7 +41,7 @@ print(f"   Analysts: {ANALYSTS}")
 print()
 
 
-def run_direct_mode():
+async def run_direct_mode():
     """Run analysis in DIRECT mode (traditional tool calling)."""
     print()
     print("=" * 80)
@@ -69,7 +69,7 @@ def run_direct_mode():
     init_start = time.time()
     
     try:
-        # DIRECT mode uses synchronous initialization
+        # DIRECT mode uses synchronous initialization (no MCP to connect)
         graph = TradingAgentsGraph(
             selected_analysts=ANALYSTS,
             debug=False,
@@ -91,8 +91,9 @@ def run_direct_mode():
     analysis_start = time.time()
     
     try:
-        # DIRECT mode uses synchronous propagate
-        final_state, signal = graph.propagate(TICKER, DATE)
+        # NOTE: propagate() is now ALWAYS async (uses ainvoke internally)
+        # Even in DIRECT mode, we need to await it
+        final_state, signal = await graph.propagate(TICKER, DATE)
         analysis_time = time.time() - analysis_start
         print(f"✅ Analysis completed in {analysis_time:.2f}s")
         print()
@@ -232,8 +233,8 @@ async def main():
     """Run comparison test."""
     results = {}
     
-    # Test 1: DIRECT mode
-    direct_result = run_direct_mode()
+    # Test 1: DIRECT mode (now also async since propagate is async)
+    direct_result = await run_direct_mode()
     if direct_result:
         results["direct"] = direct_result
     
