@@ -332,8 +332,10 @@ class TradingAgentsGraph:
                 ),
             }
 
-    def propagate(self, company_name, trade_date):
-        """Run the trading agents graph for a company on a specific date."""
+    async def propagate(self, company_name, trade_date):
+        """Run the trading agents graph for a company on a specific date.
+        
+        This method is async to support MCP tool execution."""
 
         self.ticker = company_name
 
@@ -344,9 +346,9 @@ class TradingAgentsGraph:
         args = self.propagator.get_graph_args()
 
         if self.debug:
-            # Debug mode with tracing
+            # Debug mode with tracing (async stream)
             trace = []
-            for chunk in self.graph.stream(init_agent_state, **args):
+            async for chunk in self.graph.astream(init_agent_state, **args):
                 if len(chunk["messages"]) == 0:
                     pass
                 else:
@@ -355,8 +357,8 @@ class TradingAgentsGraph:
 
             final_state = trace[-1]
         else:
-            # Standard mode without tracing
-            final_state = self.graph.invoke(init_agent_state, **args)
+            # Standard mode without tracing (async invoke)
+            final_state = await self.graph.ainvoke(init_agent_state, **args)
 
         # Store current state for reflection
         self.curr_state = final_state

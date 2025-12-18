@@ -163,6 +163,7 @@ class MCPToolExecutor:
     Tool executor that routes calls through MCP.
     
     This replaces LangGraph's ToolNode for MCP-enabled tools.
+    LangGraph supports async node functions, so this provides an async __call__.
     """
     
     def __init__(self, mcp_client: MCPClient, tool_to_server_mapping: Dict[str, str]):
@@ -226,9 +227,11 @@ class MCPToolExecutor:
         
         return results
     
-    def __call__(self, state):
+    async def __call__(self, state):
         """
         Execute tool calls from agent state (compatible with LangGraph).
+        
+        This is an async method that LangGraph can call directly within its event loop.
         
         Args:
             state: Agent state containing messages
@@ -242,8 +245,8 @@ class MCPToolExecutor:
         if not hasattr(last_message, 'tool_calls') or not last_message.tool_calls:
             return {"messages": []}
         
-        # Execute tool calls synchronously (LangGraph expects sync)
-        tool_results = asyncio.run(self.execute_tool_calls(last_message.tool_calls))
+        # Execute tool calls asynchronously within the existing event loop
+        tool_results = await self.execute_tool_calls(last_message.tool_calls)
         
         return {"messages": tool_results}
 
