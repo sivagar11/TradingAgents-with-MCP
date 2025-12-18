@@ -21,17 +21,23 @@ Purpose: Comprehensive research data for MCP performance analysis
 """
 
 import os
+import sys
 import time
 import asyncio
 import tracemalloc
 from pathlib import Path
 from datetime import datetime
+
+# Add project root to Python path
+project_root = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
+
 from dotenv import load_dotenv
 from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.default_config import DEFAULT_CONFIG
 
-# Load environment variables
-env_path = Path(__file__).parent / '.env'
+# Load environment variables from project root
+env_path = project_root / '.env'
 load_dotenv(env_path)
 
 print()

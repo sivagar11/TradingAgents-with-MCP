@@ -1,33 +1,39 @@
 #!/usr/bin/env python3
 """
-Simple MCP Integration Test
+Test News Analyst with MCP Integration
 
-This script just tests if MCP works - no comparison with DIRECT mode.
+This script tests the News MCP server independently.
+Similar to test_mcp_simple.py but for the News analyst.
 """
 
 import os
+import sys
 import time
+import asyncio
 from pathlib import Path
+
+# Add project root to Python path
+project_root = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
+
 from dotenv import load_dotenv
 from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.default_config import DEFAULT_CONFIG
 
-# Load environment variables
-env_path = Path(__file__).parent / '.env'
+# Load environment variables from project root
+env_path = project_root / '.env'
 load_dotenv(env_path)
 
 print()
 print("=" * 80)
-print("🧪 MCP INTEGRATION TEST")
+print("🧪 NEWS ANALYST MCP INTEGRATION TEST")
 print("=" * 80)
-print()
-print("Testing if Model Context Protocol (MCP) integration works...")
 print()
 
 # Configuration
 TICKER = "NVDA"
 DATE = "2024-11-01"
-ANALYSTS = ["market"]  # Just market analyst for simple test
+ANALYSTS = ["news"]  # Only News analyst
 
 config = DEFAULT_CONFIG.copy()
 config.update({
@@ -37,29 +43,31 @@ config.update({
     "quick_think_llm": "gpt-4o-mini",
     "max_debate_rounds": 0,
     "max_risk_discuss_rounds": 0,
+    # Use DEFAULT_CONFIG vendors for fair comparison with DIRECT mode
+    # (no vendor overrides - uses openai for news)
 })
 
 print("📊 Configuration:")
-print(f"   Mode: MCP (enabled)")
+print(f"   Mode: MCP")
 print(f"   Ticker: {TICKER}")
 print(f"   Date: {DATE}")
-print(f"   Analysts: {ANALYSTS}")
+print(f"   Analyst: News only")
+print(f"   Data Vendors: Using DEFAULT_CONFIG (same as DIRECT mode for comparison)")
 print()
 
 async def run_test():
-    """Run the MCP test asynchronously."""
+    """Run the News analyst MCP test."""
     
     graph = None
     
     try:
         # Step 1: Initialize
         print("-" * 80)
-        print("STEP 1: Initializing TradingAgents with MCP...")
+        print("STEP 1: Initializing TradingAgents with MCP (News Server)...")
         print("-" * 80)
         init_start = time.time()
 
         try:
-            # Use async factory method for MCP mode
             graph = await TradingAgentsGraph.create(
                 selected_analysts=ANALYSTS,
                 debug=False,
@@ -72,16 +80,11 @@ async def run_test():
             print(f"❌ FAILED: {e}")
             import traceback
             traceback.print_exc()
-            print()
-            print("💡 Troubleshooting:")
-            print("   1. Make sure MCP packages are installed: pip install -r requirements-mcp.txt")
-            print("   2. Check that the MCP server path is correct in default_config.py")
-            print("   3. Try running the server standalone to test it")
             return None, None, None
 
         # Step 2: Run Analysis
         print("-" * 80)
-        print("STEP 2: Running analysis with MCP...")
+        print("STEP 2: Running News analysis via MCP...")
         print("-" * 80)
         analysis_start = time.time()
 
@@ -99,10 +102,10 @@ async def run_test():
         return init_time, analysis_time, final_state
     
     finally:
-        # Step 4: Cleanup (always runs, even if there was an error)
+        # Step 3: Cleanup (always runs)
         if graph is not None:
             print("-" * 80)
-            print("STEP 4: Cleaning up MCP connections...")
+            print("STEP 3: Cleaning up MCP connections...")
             print("-" * 80)
             try:
                 await graph.close()
@@ -114,60 +117,76 @@ async def run_test():
 
 
 # Run the async test
-import asyncio
+print("Starting test...")
+print()
 init_time, analysis_time, final_state = asyncio.run(run_test())
 
 if final_state is None:
-    print("Test failed - exiting")
+    print()
+    print("=" * 80)
+    print("❌ TEST FAILED")
+    print("=" * 80)
+    print()
+    print("💡 Troubleshooting:")
+    print("   1. Check OPENAI_API_KEY in .env file")
+    print("   2. Verify network connectivity")
+    print("   3. Try running with DIRECT mode: config['use_mcp'] = False")
+    print()
     exit(1)
 
-# Step 3: Verify Results (after async run)
+# Step 4: Verify Results
 print("-" * 80)
-print("STEP 3: Verifying results...")
+print("STEP 4: Verifying results...")
 print("-" * 80)
 
-market_report = final_state.get("market_report") if final_state else None
+news_report = final_state.get("news_report") if final_state else None
 decision = final_state.get("final_trade_decision") if final_state else None
 
-if market_report:
-    print("✅ Market Report Generated")
-    print(f"   Length: {len(market_report)} characters")
-    print(f"   Preview: {market_report[:150]}...")
+if news_report:
+    print(f"✅ News Report: {len(news_report)} characters")
     print()
+    print("📰 News Report Preview:")
+    print("-" * 80)
+    print(news_report[:500] + "..." if len(news_report) > 500 else news_report)
+    print("-" * 80)
 else:
-    print("❌ No market report found")
-    print()
+    print("❌ News Report: NOT GENERATED")
+
+print()
 
 if decision:
-    print("✅ Final Decision Generated")
-    if len(decision) > 500:
-        print(f"   Preview: {decision[:500]}...")
-    else:
-        print(f"   Decision: {decision}")
-    print()
+    print(f"✅ Final Decision: {len(decision)} characters")
 else:
-    print("⚠️  No final decision (expected if only running 1 analyst)")
-    print()
+    print("❌ Final Decision: NOT GENERATED")
+
+print()
 
 # Summary
 print("=" * 80)
-print("🎉 MCP INTEGRATION TEST RESULTS")
+print("📊 NEWS ANALYST MCP TEST SUMMARY")
 print("=" * 80)
 print()
-print(f"✅ MCP Client Initialization: PASSED ({init_time:.2f}s)")
-print(f"✅ MCP Tool Execution: PASSED")
-print(f"✅ Analysis Completion: PASSED ({analysis_time:.2f}s)")
-print(f"✅ Result Generation: PASSED")
-print()
-print(f"⏱️  Total Time: {init_time + analysis_time:.2f}s")
+
+if news_report and decision:
+    print("🎉 TEST PASSED! ✅")
+    print()
+    print(f"⏱️  Initialization: {init_time:.2f}s")
+    print(f"⏱️  Analysis: {analysis_time:.2f}s")
+    print(f"⏱️  Total: {init_time + analysis_time:.2f}s")
+    print()
+    print("✅ MCP Integration Status:")
+    print("   - News MCP Server: WORKING")
+    print("   - Tool Routing: WORKING")
+    print("   - Data Fetching: WORKING")
+    print("   - Report Generation: WORKING")
+    print()
+    print("Next: Test other analysts (fundamentals, social)")
+else:
+    print("⚠️  TEST INCOMPLETE")
+    print()
+    print("Some components failed. Check the logs above.")
+
 print()
 print("=" * 80)
-print()
-print("🎯 CONCLUSION: MCP Integration is WORKING! ✅")
-print()
-print("Next steps:")
-print("  1. Run comparison test: python test_mcp_comparison.py")
-print("  2. Implement remaining MCP servers (news, fundamentals, social)")
-print("  3. Test with all 4 analysts")
 print()
 

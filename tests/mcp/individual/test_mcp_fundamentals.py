@@ -1,33 +1,38 @@
 #!/usr/bin/env python3
 """
-Test News Analyst with MCP Integration
+Test Fundamentals Analyst with MCP Integration
 
-This script tests the News MCP server independently.
-Similar to test_mcp_simple.py but for the News analyst.
+This script tests the Fundamentals MCP server independently.
 """
 
 import os
+import sys
 import time
 import asyncio
 from pathlib import Path
+
+# Add project root to Python path
+project_root = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
+
 from dotenv import load_dotenv
 from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.default_config import DEFAULT_CONFIG
 
-# Load environment variables
-env_path = Path(__file__).parent / '.env'
+# Load environment variables from project root
+env_path = project_root / '.env'
 load_dotenv(env_path)
 
 print()
 print("=" * 80)
-print("🧪 NEWS ANALYST MCP INTEGRATION TEST")
+print("🧪 FUNDAMENTALS ANALYST MCP INTEGRATION TEST")
 print("=" * 80)
 print()
 
 # Configuration
 TICKER = "NVDA"
 DATE = "2024-11-01"
-ANALYSTS = ["news"]  # Only News analyst
+ANALYSTS = ["fundamentals"]  # Only Fundamentals analyst
 
 config = DEFAULT_CONFIG.copy()
 config.update({
@@ -38,26 +43,26 @@ config.update({
     "max_debate_rounds": 0,
     "max_risk_discuss_rounds": 0,
     # Use DEFAULT_CONFIG vendors for fair comparison with DIRECT mode
-    # (no vendor overrides - uses openai for news)
+    # (no vendor overrides - uses openai for fundamentals/news)
 })
 
 print("📊 Configuration:")
 print(f"   Mode: MCP")
 print(f"   Ticker: {TICKER}")
 print(f"   Date: {DATE}")
-print(f"   Analyst: News only")
+print(f"   Analyst: Fundamentals only")
 print(f"   Data Vendors: Using DEFAULT_CONFIG (same as DIRECT mode for comparison)")
 print()
 
 async def run_test():
-    """Run the News analyst MCP test."""
+    """Run the Fundamentals analyst MCP test."""
     
     graph = None
     
     try:
         # Step 1: Initialize
         print("-" * 80)
-        print("STEP 1: Initializing TradingAgents with MCP (News Server)...")
+        print("STEP 1: Initializing TradingAgents with MCP (Fundamentals Server)...")
         print("-" * 80)
         init_start = time.time()
 
@@ -78,7 +83,7 @@ async def run_test():
 
         # Step 2: Run Analysis
         print("-" * 80)
-        print("STEP 2: Running News analysis via MCP...")
+        print("STEP 2: Running Fundamentals analysis via MCP...")
         print("-" * 80)
         analysis_start = time.time()
 
@@ -123,7 +128,7 @@ if final_state is None:
     print()
     print("💡 Troubleshooting:")
     print("   1. Check OPENAI_API_KEY in .env file")
-    print("   2. Verify network connectivity")
+    print("   2. Verify yfinance can fetch data for ticker")
     print("   3. Try running with DIRECT mode: config['use_mcp'] = False")
     print()
     exit(1)
@@ -133,18 +138,18 @@ print("-" * 80)
 print("STEP 4: Verifying results...")
 print("-" * 80)
 
-news_report = final_state.get("news_report") if final_state else None
+fundamentals_report = final_state.get("fundamentals_report") if final_state else None
 decision = final_state.get("final_trade_decision") if final_state else None
 
-if news_report:
-    print(f"✅ News Report: {len(news_report)} characters")
+if fundamentals_report:
+    print(f"✅ Fundamentals Report: {len(fundamentals_report)} characters")
     print()
-    print("📰 News Report Preview:")
+    print("📈 Fundamentals Report Preview:")
     print("-" * 80)
-    print(news_report[:500] + "..." if len(news_report) > 500 else news_report)
+    print(fundamentals_report[:500] + "..." if len(fundamentals_report) > 500 else fundamentals_report)
     print("-" * 80)
 else:
-    print("❌ News Report: NOT GENERATED")
+    print("❌ Fundamentals Report: NOT GENERATED")
 
 print()
 
@@ -157,11 +162,11 @@ print()
 
 # Summary
 print("=" * 80)
-print("📊 NEWS ANALYST MCP TEST SUMMARY")
+print("📊 FUNDAMENTALS ANALYST MCP TEST SUMMARY")
 print("=" * 80)
 print()
 
-if news_report and decision:
+if fundamentals_report and decision:
     print("🎉 TEST PASSED! ✅")
     print()
     print(f"⏱️  Initialization: {init_time:.2f}s")
@@ -169,12 +174,12 @@ if news_report and decision:
     print(f"⏱️  Total: {init_time + analysis_time:.2f}s")
     print()
     print("✅ MCP Integration Status:")
-    print("   - News MCP Server: WORKING")
+    print("   - Fundamentals MCP Server: WORKING")
     print("   - Tool Routing: WORKING")
     print("   - Data Fetching: WORKING")
     print("   - Report Generation: WORKING")
     print()
-    print("Next: Test other analysts (fundamentals, social)")
+    print("Next: Test social analyst")
 else:
     print("⚠️  TEST INCOMPLETE")
     print()
