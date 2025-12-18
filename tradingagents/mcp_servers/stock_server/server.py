@@ -1,8 +1,17 @@
 """Stock MCP Server - Exposes stock data and technical indicators via MCP."""
 
 import sys
+import os
 import json
 from typing import Annotated
+from pathlib import Path
+
+# Add parent directory to Python path so we can import tradingagents
+# This is needed because the MCP server runs as a separate process
+server_dir = Path(__file__).parent
+project_root = server_dir.parent.parent.parent
+sys.path.insert(0, str(project_root))
+
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool, TextContent
