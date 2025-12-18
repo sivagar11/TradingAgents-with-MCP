@@ -5,8 +5,16 @@ import json
 from typing import Dict, Any, List, Optional
 from contextlib import asynccontextmanager
 
-from mcp import ClientSession, StdioServerParameters
-from mcp.client.stdio import stdio_client
+try:
+    from mcp import ClientSession, StdioServerParameters
+    from mcp.client.stdio import stdio_client
+except ImportError:
+    # Fallback for different MCP package structure
+    try:
+        from mcp.client import ClientSession, StdioServerParameters
+        from mcp.client.stdio import stdio_client
+    except ImportError:
+        print("ERROR: MCP package not found. Install with: pip install mcp")
 from langchain_core.messages import ToolMessage
 
 
@@ -15,7 +23,7 @@ class MCPClient:
     
     def __init__(self):
         """Initialize MCP client."""
-        self.sessions: Dict[str, ClientSession] = {}
+        self.sessions: Dict[str, tuple] = {}  # name -> (session, context_manager)
         self.server_configs: Dict[str, StdioServerParameters] = {}
         self._initialized = False
     
@@ -43,22 +51,31 @@ class MCPClient:
     async def connect_server(self, name: str, config: StdioServerParameters):
         """Connect to a specific MCP server."""
         try:
-            # Create stdio client connection
-            read, write = await stdio_client(config)
+            print(f"MCP: Connecting to '{name}' server...")
             
-            # Create session
-            session = ClientSession(read, write)
-            await session.initialize()
+            # Create stdio client as context manager
+            stdio_ctx = stdio_client(config)
             
-            # Store session
-            self.sessions[name] = session
+            # Enter context and get streams
+            read_stream, write_stream = await stdio_ctx.__aenter__()
+            
+            # Create and initialize session
+            session = ClientSession(read_stream, write_stream)
+            init_result = await session.initialize()
+            
+            # Store session and context manager (need ctx for cleanup)
+            self.sessions[name] = (session, stdio_ctx)
             
             # List available tools (for debugging)
             tools_result = await session.list_tools()
-            print(f"MCP: Connected to '{name}' server with {len(tools_result.tools)} tools")
+            print(f"MCP: ✅ Connected to '{name}' server with {len(tools_result.tools)} tools")
+            for tool in tools_result.tools:
+                print(f"MCP:    - {tool.name}")
             
         except Exception as e:
-            print(f"MCP: Failed to connect to '{name}' server: {e}")
+            print(f"MCP: ❌ Failed to connect to '{name}' server: {e}")
+            import traceback
+            traceback.print_exc()
             raise
     
     async def call_tool(self, server_name: str, tool_name: str, arguments: Dict[str, Any]) -> str:
@@ -79,7 +96,7 @@ class MCPClient:
         if server_name not in self.sessions:
             raise ValueError(f"Server '{server_name}' not connected")
         
-        session = self.sessions[server_name]
+        session, _ = self.sessions[server_name]  # Unpack session from tuple
         
         try:
             # Call tool on server
@@ -101,15 +118,16 @@ class MCPClient:
         if server_name not in self.sessions:
             return []
         
-        session = self.sessions[server_name]
+        session, _ = self.sessions[server_name]  # Unpack session from tuple
         tools_result = await session.list_tools()
         return [tool.name for tool in tools_result.tools]
     
     async def close_all(self):
         """Close all server connections."""
-        for name, session in self.sessions.items():
+        for name, (session, ctx) in self.sessions.items():
             try:
-                await session.close()
+                # Exit the context manager properly
+                await ctx.__aexit__(None, None, None)
                 print(f"MCP: Closed connection to '{name}'")
             except Exception as e:
                 print(f"MCP: Error closing '{name}': {e}")
