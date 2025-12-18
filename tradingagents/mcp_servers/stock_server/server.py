@@ -18,9 +18,14 @@ server_dir = Path(__file__).parent
 project_root = server_dir.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
+# CRITICAL FIX: Redirect stdout to stderr BEFORE any imports
+# This prevents FastMCP banner and any other stdout output from corrupting JSON-RPC
+_original_stdout = sys.stdout
+sys.stdout = sys.stderr
+
 # Configure logging to stderr ONLY (never stdout for MCP stdio servers)
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.ERROR,  # Reduce noise
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     stream=sys.stderr  # Must be stderr, not stdout!
 )
@@ -34,7 +39,7 @@ from fastmcp import FastMCP
 # We need to suppress that
 from tradingagents.dataflows.interface import route_to_vendor
 
-# Create FastMCP server instance
+# Create FastMCP server instance (banner will go to stderr now)
 mcp = FastMCP("Stock Data Server")
 
 
@@ -134,6 +139,11 @@ def create_stock_server():
 
 
 if __name__ == "__main__":
-    # Run the FastMCP server
-    mcp.run()
+    # Restore stdout for MCP JSON-RPC communication
+    # (we redirected it earlier to suppress the banner)
+    sys.stdout = _original_stdout
+    
+    # Run the FastMCP server with stdio transport
+    logger.info("Starting Stock MCP Server...")
+    mcp.run(transport="stdio")
 

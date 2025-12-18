@@ -2,8 +2,9 @@
 
 import asyncio
 import json
+import logging
 from typing import Dict, Any, List, Optional
-from contextlib import asynccontextmanager
+from contextlib import AsyncExitStack
 
 try:
     from mcp import ClientSession, StdioServerParameters
@@ -17,15 +18,18 @@ except ImportError:
         print("ERROR: MCP package not found. Install with: pip install mcp")
 from langchain_core.messages import ToolMessage
 
+logger = logging.getLogger(__name__)
+
 
 class MCPClient:
     """Client for managing connections to multiple MCP servers."""
     
     def __init__(self):
         """Initialize MCP client."""
-        self.sessions: Dict[str, tuple] = {}  # name -> (session, context_manager)
+        self.sessions: Dict[str, ClientSession] = {}  # name -> session
         self.server_configs: Dict[str, StdioServerParameters] = {}
         self._initialized = False
+        self._exit_stack: Optional[AsyncExitStack] = None
     
     def register_server(self, name: str, command: str, args: List[str] = None):
         """
@@ -48,43 +52,51 @@ class MCPClient:
             await self.connect_server(name, config)
         self._initialized = True
     
-    async def connect_server(self, name: str, config: StdioServerParameters, timeout: int = 30):
+    async def connect_server(self, name: str, config: StdioServerParameters, timeout: int = 60):
         """Connect to a specific MCP server with timeout."""
         try:
-            print(f"MCP: Connecting to '{name}' server (timeout: {timeout}s)...")
+            logger.info(f"MCP: Connecting to '{name}' server (timeout: {timeout}s)...")
+            
+            # Initialize exit stack if needed (for proper async context management)
+            if self._exit_stack is None:
+                self._exit_stack = AsyncExitStack()
+                await self._exit_stack.__aenter__()
             
             # Wrap connection in timeout
             async with asyncio.timeout(timeout):
-                # Create stdio client as context manager
-                stdio_ctx = stdio_client(config)
+                logger.info(f"MCP: Starting '{name}' server process...")
                 
-                print(f"MCP: Starting server process...")
-                # Enter context and get streams
-                read_stream, write_stream = await stdio_ctx.__aenter__()
+                # Enter stdio client context via exit stack
+                # This properly manages the async context for the server connection
+                read_stream, write_stream = await self._exit_stack.enter_async_context(
+                    stdio_client(config)
+                )
                 
-                print(f"MCP: Initializing session...")
-                # Create and initialize session
-                session = ClientSession(read_stream, write_stream)
+                logger.info(f"MCP: Creating session for '{name}'...")
+                # Enter session context via exit stack
+                session = await self._exit_stack.enter_async_context(
+                    ClientSession(read_stream, write_stream)
+                )
+                
+                logger.info(f"MCP: Initializing '{name}' session...")
                 init_result = await session.initialize()
                 
-                # Store session and context manager (need ctx for cleanup)
-                self.sessions[name] = (session, stdio_ctx)
+                # Store session (exit stack will handle cleanup)
+                self.sessions[name] = session
                 
-                print(f"MCP: Listing tools...")
+                logger.info(f"MCP: Listing tools for '{name}'...")
                 # List available tools (for debugging)
                 tools_result = await session.list_tools()
-                print(f"MCP: ✅ Connected to '{name}' server with {len(tools_result.tools)} tools")
+                logger.info(f"MCP: ✅ Connected to '{name}' with {len(tools_result.tools)} tools")
                 for tool in tools_result.tools:
-                    print(f"MCP:    - {tool.name}")
+                    logger.info(f"MCP:    - {tool.name}")
             
         except asyncio.TimeoutError:
-            print(f"MCP: ❌ Connection to '{name}' server timed out after {timeout}s")
-            print(f"MCP: This usually means the server is not responding properly")
+            logger.error(f"MCP: ❌ Timeout connecting to '{name}' after {timeout}s")
+            logger.error("MCP: Server may not be responding - check server logs on stderr")
             raise
         except Exception as e:
-            print(f"MCP: ❌ Failed to connect to '{name}' server: {e}")
-            import traceback
-            traceback.print_exc()
+            logger.error(f"MCP: ❌ Connection failed for '{name}': {e}", exc_info=True)
             raise
     
     async def call_tool(self, server_name: str, tool_name: str, arguments: Dict[str, Any]) -> str:
@@ -105,7 +117,7 @@ class MCPClient:
         if server_name not in self.sessions:
             raise ValueError(f"Server '{server_name}' not connected")
         
-        session, _ = self.sessions[server_name]  # Unpack session from tuple
+        session = self.sessions[server_name]
         
         try:
             # Call tool on server
@@ -119,7 +131,7 @@ class MCPClient:
             
         except Exception as e:
             error_msg = f"MCP tool call failed: {tool_name} on {server_name}: {e}"
-            print(f"ERROR: {error_msg}")
+            logger.error(error_msg, exc_info=True)
             return error_msg
     
     async def list_tools(self, server_name: str) -> List[str]:
@@ -127,21 +139,22 @@ class MCPClient:
         if server_name not in self.sessions:
             return []
         
-        session, _ = self.sessions[server_name]  # Unpack session from tuple
+        session = self.sessions[server_name]
         tools_result = await session.list_tools()
         return [tool.name for tool in tools_result.tools]
     
     async def close_all(self):
         """Close all server connections."""
-        for name, (session, ctx) in self.sessions.items():
+        if self._exit_stack:
             try:
-                # Exit the context manager properly
-                await ctx.__aexit__(None, None, None)
-                print(f"MCP: Closed connection to '{name}'")
+                # Exit stack will properly close all contexts in reverse order
+                await self._exit_stack.__aexit__(None, None, None)
+                logger.info("MCP: Closed all server connections")
             except Exception as e:
-                print(f"MCP: Error closing '{name}': {e}")
+                logger.error(f"MCP: Error closing connections: {e}", exc_info=True)
         
         self.sessions.clear()
+        self._exit_stack = None
         self._initialized = False
 
 
