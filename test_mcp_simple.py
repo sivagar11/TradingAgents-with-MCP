@@ -49,51 +49,68 @@ print()
 async def run_test():
     """Run the MCP test asynchronously."""
     
-    # Step 1: Initialize
-    print("-" * 80)
-    print("STEP 1: Initializing TradingAgents with MCP...")
-    print("-" * 80)
-    init_start = time.time()
-
-    try:
-        # Use async factory method for MCP mode
-        graph = await TradingAgentsGraph.create(
-            selected_analysts=ANALYSTS,
-            debug=False,
-            config=config
-        )
-        init_time = time.time() - init_start
-        print(f"✅ SUCCESS: Initialized in {init_time:.2f}s")
-        print()
-    except Exception as e:
-        print(f"❌ FAILED: {e}")
-        import traceback
-        traceback.print_exc()
-        print()
-        print("💡 Troubleshooting:")
-        print("   1. Make sure MCP packages are installed: pip install -r requirements-mcp.txt")
-        print("   2. Check that the MCP server path is correct in default_config.py")
-        print("   3. Try running the server standalone to test it")
-        return None, None, None
-
-    # Step 2: Run Analysis
-    print("-" * 80)
-    print("STEP 2: Running analysis with MCP...")
-    print("-" * 80)
-    analysis_start = time.time()
-
-    try:
-        final_state, signal = await graph.propagate(TICKER, DATE)
-        analysis_time = time.time() - analysis_start
-        print(f"✅ SUCCESS: Analysis completed in {analysis_time:.2f}s")
-        print()
-    except Exception as e:
-        print(f"❌ FAILED: {e}")
-        import traceback
-        traceback.print_exc()
-        return None, None, None
+    graph = None
     
-    return init_time, analysis_time, final_state
+    try:
+        # Step 1: Initialize
+        print("-" * 80)
+        print("STEP 1: Initializing TradingAgents with MCP...")
+        print("-" * 80)
+        init_start = time.time()
+
+        try:
+            # Use async factory method for MCP mode
+            graph = await TradingAgentsGraph.create(
+                selected_analysts=ANALYSTS,
+                debug=False,
+                config=config
+            )
+            init_time = time.time() - init_start
+            print(f"✅ SUCCESS: Initialized in {init_time:.2f}s")
+            print()
+        except Exception as e:
+            print(f"❌ FAILED: {e}")
+            import traceback
+            traceback.print_exc()
+            print()
+            print("💡 Troubleshooting:")
+            print("   1. Make sure MCP packages are installed: pip install -r requirements-mcp.txt")
+            print("   2. Check that the MCP server path is correct in default_config.py")
+            print("   3. Try running the server standalone to test it")
+            return None, None, None
+
+        # Step 2: Run Analysis
+        print("-" * 80)
+        print("STEP 2: Running analysis with MCP...")
+        print("-" * 80)
+        analysis_start = time.time()
+
+        try:
+            final_state, signal = await graph.propagate(TICKER, DATE)
+            analysis_time = time.time() - analysis_start
+            print(f"✅ SUCCESS: Analysis completed in {analysis_time:.2f}s")
+            print()
+        except Exception as e:
+            print(f"❌ FAILED: {e}")
+            import traceback
+            traceback.print_exc()
+            return None, None, None
+        
+        return init_time, analysis_time, final_state
+    
+    finally:
+        # Step 4: Cleanup (always runs, even if there was an error)
+        if graph is not None:
+            print("-" * 80)
+            print("STEP 4: Cleaning up MCP connections...")
+            print("-" * 80)
+            try:
+                await graph.close()
+                print("✅ MCP connections closed cleanly")
+                print()
+            except Exception as e:
+                print(f"⚠️  Cleanup warning: {e}")
+                print()
 
 
 # Run the async test

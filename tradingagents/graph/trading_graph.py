@@ -255,6 +255,16 @@ class TradingAgentsGraph:
         
         return instance
 
+    async def close(self):
+        """Close all MCP connections and cleanup resources.
+        
+        This should be called when you're done using the graph to ensure
+        proper cleanup of MCP connections and prevent resource leaks.
+        """
+        if self.mcp_client is not None:
+            await self.mcp_client.close_all()
+            self.mcp_client = None
+
     async def _initialize_mcp_async(self) -> MCPClient:
         """Initialize MCP client and connect to servers (ASYNC).
         
