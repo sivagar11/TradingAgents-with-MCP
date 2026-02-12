@@ -1,14 +1,4 @@
-<p align="center">
-  <img src="assets/TauricResearch.png" style="width: 60%; height: auto;">
-</p>
 
-<div align="center" style="line-height: 1;">
-  <a href="https://arxiv.org/abs/2412.20138" target="_blank"><img alt="arXiv" src="https://img.shields.io/badge/arXiv-2412.20138-B31B1B?logo=arxiv"/></a>
-  <a href="https://github.com/sivagar11/Trading-Agents" target="_blank"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-MCP--Enhanced-blue?logo=github"/></a>
-  <a href="./MCP_README.md" target="_blank"><img alt="MCP Docs" src="https://img.shields.io/badge/MCP-Documentation-green"/></a>
-</div>
-
----
 
 # TradingAgents with Model Context Protocol (MCP)
 
