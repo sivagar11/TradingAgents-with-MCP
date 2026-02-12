@@ -27,9 +27,16 @@
 
 # TradingAgents: Multi-Agents LLM Financial Trading Framework 
 
-> 🎉 **TradingAgents** officially released! We have received numerous inquiries about the work, and we would like to express our thanks for the enthusiasm in our community.
+> 🚀 **MCP-Enhanced TradingAgents**: This repository is an enhanced version of the original [TradingAgents](https://github.com/TauricResearch/TradingAgents) framework with **Model Context Protocol (MCP)** integration.
 >
-> So we decided to fully open-source the framework. Looking forward to building impactful projects with you!
+> **What's New:**
+> - ✅ Full MCP integration for modular tool execution
+> - ✅ Four specialized MCP servers: Stock, News, Fundamentals, and Social
+> - ✅ Dual-mode operation: Direct tool calls vs MCP protocol
+> - ✅ Async architecture for better performance
+> - ✅ Enhanced CLI, API, and Web interfaces
+>
+> This implementation adds MCP support while maintaining full backward compatibility with the original framework.
 
 <div align="center">
 <a href="https://www.star-history.com/#TauricResearch/TradingAgents&Date">
@@ -95,10 +102,10 @@ Our framework decomposes complex trading tasks into specialized roles. This ensu
 
 ### Installation
 
-Clone TradingAgents:
+Clone this MCP-Enhanced TradingAgents repository:
 ```bash
-git clone https://github.com/TauricResearch/TradingAgents.git
-cd TradingAgents
+git clone https://github.com/[YOUR-USERNAME]/Trading-Agents.git
+cd Trading-Agents
 ```
 
 Create a virtual environment in any of your favorite environment managers:
@@ -107,9 +114,14 @@ conda create -n tradingagents python=3.13
 conda activate tradingagents
 ```
 
-Install dependencies:
+Install core dependencies:
 ```bash
 pip install -r requirements.txt
+```
+
+Install MCP dependencies (optional, for MCP mode):
+```bash
+pip install -r requirements-mcp.txt
 ```
 
 ### Required APIs
@@ -128,6 +140,25 @@ cp .env.example .env
 ```
 
 **Note:** We are happy to partner with Alpha Vantage to provide robust API support for TradingAgents. You can get a free AlphaVantage API [here](https://www.alphavantage.co/support/#api-key), TradingAgents-sourced requests also have increased rate limits to 60 requests per minute with no daily limits. Typically the quota is sufficient for performing complex tasks with TradingAgents thanks to Alpha Vantage’s open-source support program. If you prefer to use OpenAI for these data sources instead, you can modify the data vendor settings in `tradingagents/default_config.py`.
+
+### MCP Mode (Optional)
+
+This enhanced version supports Model Context Protocol for modular tool execution. To enable MCP mode:
+
+1. Install MCP dependencies: `pip install -r requirements-mcp.txt`
+2. Toggle MCP mode in `tradingagents/default_config.py`:
+
+```python
+"use_mcp": True  # Enable MCP mode (default: False)
+```
+
+**MCP Benefits:**
+- Modular architecture with specialized servers
+- Better separation of concerns
+- Protocol-based tool execution
+- Easy server extensibility
+
+For detailed MCP documentation, see [MCP_README.md](MCP_README.md) and [MCP_INTEGRATION_GUIDE.md](MCP_INTEGRATION_GUIDE.md).
 
 ### CLI Usage
 
@@ -172,7 +203,32 @@ _, decision = ta.propagate("NVDA", "2024-05-10")
 print(decision)
 ```
 
-You can also adjust the default configuration to set your own choice of LLMs, debate rounds, etc.
+**For MCP Mode (with async initialization):**
+
+```python
+import asyncio
+from tradingagents.graph.trading_graph import TradingAgentsGraph
+from tradingagents.default_config import DEFAULT_CONFIG
+
+async def main():
+    # Enable MCP mode
+    config = DEFAULT_CONFIG.copy()
+    config["use_mcp"] = True
+    
+    # Create graph with async initialization
+    ta = await TradingAgentsGraph.create(debug=True, config=config)
+    
+    try:
+        # Forward propagate
+        _, decision = await ta.propagate("NVDA", "2024-05-10")
+        print(decision)
+    finally:
+        await ta.close()  # Clean up MCP connections
+
+asyncio.run(main())
+```
+
+You can also adjust the default configuration to set your own choice of LLMs, debate rounds, data vendors, etc.
 
 ```python
 from tradingagents.graph.trading_graph import TradingAgentsGraph
@@ -183,6 +239,7 @@ config = DEFAULT_CONFIG.copy()
 config["deep_think_llm"] = "gpt-4.1-nano"  # Use a different model
 config["quick_think_llm"] = "gpt-4.1-nano"  # Use a different model
 config["max_debate_rounds"] = 1  # Increase debate rounds
+config["use_mcp"] = False  # Toggle MCP mode (True for MCP, False for direct)
 
 # Configure data vendors (default uses yfinance and Alpha Vantage)
 config["data_vendors"] = {
