@@ -104,7 +104,7 @@ Our framework decomposes complex trading tasks into specialized roles. This ensu
 
 Clone this MCP-Enhanced TradingAgents repository:
 ```bash
-git clone https://github.com/[YOUR-USERNAME]/Trading-Agents.git
+git clone https://github.com/sivagar11/Trading-Agents.git
 cd Trading-Agents
 ```
 
