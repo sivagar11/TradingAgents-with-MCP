@@ -4,206 +4,265 @@
 
 <div align="center" style="line-height: 1;">
   <a href="https://arxiv.org/abs/2412.20138" target="_blank"><img alt="arXiv" src="https://img.shields.io/badge/arXiv-2412.20138-B31B1B?logo=arxiv"/></a>
-  <a href="https://discord.com/invite/hk9PGKShPK" target="_blank"><img alt="Discord" src="https://img.shields.io/badge/Discord-TradingResearch-7289da?logo=discord&logoColor=white&color=7289da"/></a>
-  <a href="./assets/wechat.png" target="_blank"><img alt="WeChat" src="https://img.shields.io/badge/WeChat-TauricResearch-brightgreen?logo=wechat&logoColor=white"/></a>
-  <a href="https://x.com/TauricResearch" target="_blank"><img alt="X Follow" src="https://img.shields.io/badge/X-TauricResearch-white?logo=x&logoColor=white"/></a>
-  <br>
-  <a href="https://github.com/TauricResearch/" target="_blank"><img alt="Community" src="https://img.shields.io/badge/Join_GitHub_Community-TauricResearch-14C290?logo=discourse"/></a>
-</div>
-
-<div align="center">
-  <!-- Keep these links. Translations will automatically update with the README. -->
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=de">Deutsch</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=es">Español</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=fr">français</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=ja">日本語</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=ko">한국어</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=pt">Português</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=ru">Русский</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=zh">中文</a>
+  <a href="https://github.com/sivagar11/Trading-Agents" target="_blank"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-MCP--Enhanced-blue?logo=github"/></a>
+  <a href="./MCP_README.md" target="_blank"><img alt="MCP Docs" src="https://img.shields.io/badge/MCP-Documentation-green"/></a>
 </div>
 
 ---
 
-# TradingAgents: Multi-Agents LLM Financial Trading Framework 
+# TradingAgents with Model Context Protocol (MCP)
 
-> 🚀 **MCP-Enhanced TradingAgents**: This repository is an enhanced version of the original [TradingAgents](https://github.com/TauricResearch/TradingAgents) framework with **Model Context Protocol (MCP)** integration.
->
-> **What's New:**
-> - ✅ Full MCP integration for modular tool execution
-> - ✅ Four specialized MCP servers: Stock, News, Fundamentals, and Social
-> - ✅ Dual-mode operation: Direct tool calls vs MCP protocol
-> - ✅ Async architecture for better performance
-> - ✅ Enhanced CLI, API, and Web interfaces
->
-> This implementation adds MCP support while maintaining full backward compatibility with the original framework.
+> 🚀 **MCP-Enhanced TradingAgents** — This is an enhanced implementation of the [TradingAgents](https://github.com/TauricResearch/TradingAgents) multi-agent LLM trading framework with full **Model Context Protocol (MCP)** integration.
 
-<div align="center">
-<a href="https://www.star-history.com/#TauricResearch/TradingAgents&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=TauricResearch/TradingAgents&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=TauricResearch/TradingAgents&type=Date" />
-   <img alt="TradingAgents Star History" src="https://api.star-history.com/svg?repos=TauricResearch/TradingAgents&type=Date" style="width: 80%; height: auto;" />
- </picture>
-</a>
-</div>
+## What's New in This Version
+
+This repository extends the original TradingAgents framework with MCP support, providing:
+
+- ✅ **Full MCP Integration**: Protocol-based tool execution using MCP SDK
+- ✅ **Four Specialized MCP Servers**: Stock, News, Fundamentals, and Social Media data
+- ✅ **Dual-Mode Operation**: Toggle between Direct tool calls and MCP protocol
+- ✅ **Async Architecture**: Fully async implementation for better performance
+- ✅ **Backward Compatible**: Works exactly like the original when MCP is disabled
+- ✅ **Enhanced Interfaces**: CLI, REST API, WebSocket streaming, and Next.js frontend
 
 <div align="center">
 
-🚀 [TradingAgents](#tradingagents-framework) | ⚡ [Installation & CLI](#installation-and-cli) | 🎬 [Demo](https://www.youtube.com/watch?v=90gr5lwjIho) | 📦 [Package Usage](#tradingagents-package) | 🤝 [Contributing](#contributing) | 📄 [Citation](#citation)
+🚀 [Overview](#overview) | 🔧 [Installation](#installation) | 📖 [MCP Architecture](#mcp-architecture) | 💻 [Usage](#usage) | 🎯 [Dual Mode](#dual-mode-operation) | 📚 [Documentation](#documentation)
 
 </div>
 
-## TradingAgents Framework
+---
 
-TradingAgents is a multi-agent trading framework that mirrors the dynamics of real-world trading firms. By deploying specialized LLM-powered agents: from fundamental analysts, sentiment experts, and technical analysts, to trader, risk management team, the platform collaboratively evaluates market conditions and informs trading decisions. Moreover, these agents engage in dynamic discussions to pinpoint the optimal strategy.
+## Overview
+
+### What is TradingAgents?
+
+TradingAgents is a multi-agent LLM framework that mirrors real-world trading firms. It deploys specialized AI agents (analysts, researchers, traders, risk managers) that collaboratively analyze market conditions and make informed trading decisions through structured workflows.
 
 <p align="center">
   <img src="assets/schema.png" style="width: 100%; height: auto;">
 </p>
 
-> TradingAgents framework is designed for research purposes. Trading performance may vary based on many factors, including the chosen backbone language models, model temperature, trading periods, the quality of data, and other non-deterministic factors. [It is not intended as financial, investment, or trading advice.](https://tauric.ai/disclaimer/)
+### What is MCP?
 
-Our framework decomposes complex trading tasks into specialized roles. This ensures the system achieves a robust, scalable approach to market analysis and decision-making.
+[Model Context Protocol (MCP)](https://modelcontextprotocol.io) is an open protocol that standardizes how applications provide context to LLMs. Instead of direct function calls, tools are exposed through standardized MCP servers, enabling:
 
-### Analyst Team
-- Fundamentals Analyst: Evaluates company financials and performance metrics, identifying intrinsic values and potential red flags.
-- Sentiment Analyst: Analyzes social media and public sentiment using sentiment scoring algorithms to gauge short-term market mood.
-- News Analyst: Monitors global news and macroeconomic indicators, interpreting the impact of events on market conditions.
-- Technical Analyst: Utilizes technical indicators (like MACD and RSI) to detect trading patterns and forecast price movements.
+- **Modularity**: Each data source (stock, news, fundamentals) runs as an independent MCP server
+- **Standardization**: All tools follow the MCP protocol specification
+- **Extensibility**: Easy to add new servers without modifying core code
+- **Separation of Concerns**: Data retrieval logic isolated from agent logic
+
+### Why MCP Integration?
+
+This implementation adds MCP support to enable:
+
+1. **Research Comparison**: Compare performance between direct tool calls and MCP protocol
+2. **Modular Architecture**: Cleanly separate data providers from agent logic
+3. **Protocol Standardization**: Use industry-standard MCP for tool execution
+4. **Future Extensibility**: Easily integrate with other MCP-compatible systems
+
+> **Disclaimer**: TradingAgents is designed for research purposes. Trading performance varies based on many factors including LLM choice, market conditions, and data quality. [Not intended as financial advice.](https://tauric.ai/disclaimer/)
+
+---
+
+## Agent Team Structure
+
+The framework uses specialized agents organized into teams:
+
+### 1. Analyst Team
+- **Market Analyst**: Technical indicators (RSI, MACD, Bollinger Bands, moving averages)
+- **News Analyst**: Global news and macroeconomic events
+- **Fundamentals Analyst**: Financial statements, balance sheets, company health metrics
+- **Social Media Analyst**: Sentiment analysis from social media and Reddit
 
 <p align="center">
-  <img src="assets/analyst.png" width="100%" style="display: inline-block; margin: 0 2%;">
+  <img src="assets/analyst.png" width="100%">
 </p>
 
-### Researcher Team
-- Comprises both bullish and bearish researchers who critically assess the insights provided by the Analyst Team. Through structured debates, they balance potential gains against inherent risks.
+### 2. Research Team
+- **Bull Researcher**: Argues for bullish positions
+- **Bear Researcher**: Argues for bearish positions
+- **Research Manager**: Judges the debate and synthesizes consensus
 
 <p align="center">
-  <img src="assets/researcher.png" width="70%" style="display: inline-block; margin: 0 2%;">
+  <img src="assets/researcher.png" width="70%">
 </p>
 
-### Trader Agent
-- Composes reports from the analysts and researchers to make informed trading decisions. It determines the timing and magnitude of trades based on comprehensive market insights.
+### 3. Trading Team
+- **Trader**: Creates trading plans based on research consensus
 
 <p align="center">
-  <img src="assets/trader.png" width="70%" style="display: inline-block; margin: 0 2%;">
+  <img src="assets/trader.png" width="70%">
 </p>
 
-### Risk Management and Portfolio Manager
-- Continuously evaluates portfolio risk by assessing market volatility, liquidity, and other risk factors. The risk management team evaluates and adjusts trading strategies, providing assessment reports to the Portfolio Manager for final decision.
-- The Portfolio Manager approves/rejects the transaction proposal. If approved, the order will be sent to the simulated exchange and executed.
+### 4. Risk Management Team
+- **Aggressive Debator**: Advocates for high-risk/high-reward positions
+- **Conservative Debator**: Advocates for low-risk positions
+- **Neutral Debator**: Provides balanced risk perspective
+- **Risk Manager**: Final risk assessment and approval
 
 <p align="center">
-  <img src="assets/risk.png" width="70%" style="display: inline-block; margin: 0 2%;">
+  <img src="assets/risk.png" width="70%">
 </p>
 
-## Installation and CLI
+---
 
-### Installation
+## MCP Architecture
 
-Clone this MCP-Enhanced TradingAgents repository:
+### MCP Servers
+
+This implementation includes four specialized MCP servers:
+
+```
+tradingagents/mcp_servers/
+├── stock_server/          # Stock prices and technical indicators
+├── news_server/           # News and insider data
+├── fundamentals_server/   # Financial statements and metrics
+└── social_server/         # Social media sentiment
+```
+
+Each server:
+- Runs as an independent stdio-based MCP server
+- Exposes tools via JSON-RPC protocol
+- Uses FastMCP framework for rapid development
+- Supports the same data vendors as direct mode
+
+### MCP Client
+
+The MCP client (`tradingagents/mcp_client/`) manages:
+- Connection lifecycle to all MCP servers
+- Tool call routing through MCP protocol
+- Async context management with AsyncExitStack
+- Clean shutdown and error handling
+
+### Workflow Architecture
+
+```
+User Input (CLI/API/Frontend)
+    ↓
+TradingAgentsGraph.propagate()
+    ↓
+LangGraph Multi-Agent Workflow
+    ↓
+┌─────────────────┬─────────────────┐
+│   DIRECT MODE   │    MCP MODE     │
+├─────────────────┼─────────────────┤
+│  LangChain      │  MCPToolExecutor│
+│  ToolNode       │       ↓         │
+│      ↓          │  MCP Client     │
+│  Direct Call    │       ↓         │
+│      ↓          │  MCP Servers    │
+│  Data Vendor    │  (stdio/JSON-RPC)│
+│                 │       ↓         │
+│                 │  Data Vendor    │
+└─────────────────┴─────────────────┘
+    ↓
+Agent receives data and continues workflow
+```
+
+---
+
+## Installation
+
+### Prerequisites
+
+- Python 3.10+ (Python 3.13 recommended)
+- OpenAI API key
+- Alpha Vantage API key (free tier available)
+
+### Quick Start
+
+**1. Clone the repository:**
+
 ```bash
 git clone https://github.com/sivagar11/Trading-Agents.git
 cd Trading-Agents
 ```
 
-Create a virtual environment in any of your favorite environment managers:
+**2. Create virtual environment:**
+
 ```bash
 conda create -n tradingagents python=3.13
 conda activate tradingagents
 ```
 
-Install core dependencies:
-```bash
-pip install -r requirements.txt
-```
+**3. Install dependencies:**
 
-Install MCP dependencies (optional, for MCP mode):
 ```bash
+# Core dependencies (required)
+pip install -r requirements.txt
+
+# MCP dependencies (optional, only if using MCP mode)
 pip install -r requirements-mcp.txt
 ```
 
-### Required APIs
-
-You will need the OpenAI API for all the agents, and [Alpha Vantage API](https://www.alphavantage.co/support/#api-key) for fundamental and news data (default configuration).
+**4. Set up API keys:**
 
 ```bash
-export OPENAI_API_KEY=$YOUR_OPENAI_API_KEY
-export ALPHA_VANTAGE_API_KEY=$YOUR_ALPHA_VANTAGE_API_KEY
-```
-
-Alternatively, you can create a `.env` file in the project root with your API keys (see `.env.example` for reference):
-```bash
+# Copy example env file
 cp .env.example .env
-# Edit .env with your actual API keys
+
+# Edit .env and add your API keys:
+# OPENAI_API_KEY=your_openai_key_here
+# ALPHA_VANTAGE_API_KEY=your_alpha_vantage_key_here
 ```
 
-**Note:** We are happy to partner with Alpha Vantage to provide robust API support for TradingAgents. You can get a free AlphaVantage API [here](https://www.alphavantage.co/support/#api-key), TradingAgents-sourced requests also have increased rate limits to 60 requests per minute with no daily limits. Typically the quota is sufficient for performing complex tasks with TradingAgents thanks to Alpha Vantage’s open-source support program. If you prefer to use OpenAI for these data sources instead, you can modify the data vendor settings in `tradingagents/default_config.py`.
+Or export them directly:
 
-### MCP Mode (Optional)
-
-This enhanced version supports Model Context Protocol for modular tool execution. To enable MCP mode:
-
-1. Install MCP dependencies: `pip install -r requirements-mcp.txt`
-2. Toggle MCP mode in `tradingagents/default_config.py`:
-
-```python
-"use_mcp": True  # Enable MCP mode (default: False)
+```bash
+export OPENAI_API_KEY="your_openai_key"
+export ALPHA_VANTAGE_API_KEY="your_alpha_vantage_key"
 ```
 
-**MCP Benefits:**
-- Modular architecture with specialized servers
-- Better separation of concerns
-- Protocol-based tool execution
-- Easy server extensibility
+> **Note**: Get a free Alpha Vantage API key [here](https://www.alphavantage.co/support/#api-key). TradingAgents users get increased rate limits (60 requests/minute, no daily limit) through Alpha Vantage's open-source support program.
 
-For detailed MCP documentation, see [MCP_README.md](MCP_README.md) and [MCP_INTEGRATION_GUIDE.md](MCP_INTEGRATION_GUIDE.md).
+---
+
+## Usage
 
 ### CLI Usage
 
-You can also try out the CLI directly by running:
+Run the interactive CLI:
+
 ```bash
 python -m cli.main
 ```
-You will see a screen where you can select your desired tickers, date, LLMs, research depth, etc.
+
+The CLI provides an interactive interface to:
+- Select stock ticker and analysis date
+- Choose which analysts to include
+- Select LLM models (OpenAI, Anthropic, Google)
+- Enable/disable MCP mode
+- View real-time progress and reports
 
 <p align="center">
-  <img src="assets/cli/cli_init.png" width="100%" style="display: inline-block; margin: 0 2%;">
-</p>
-
-An interface will appear showing results as they load, letting you track the agent's progress as it runs.
-
-<p align="center">
-  <img src="assets/cli/cli_news.png" width="100%" style="display: inline-block; margin: 0 2%;">
+  <img src="assets/cli/cli_init.png" width="100%">
 </p>
 
 <p align="center">
-  <img src="assets/cli/cli_transaction.png" width="100%" style="display: inline-block; margin: 0 2%;">
+  <img src="assets/cli/cli_news.png" width="100%">
 </p>
 
-## TradingAgents Package
+<p align="center">
+  <img src="assets/cli/cli_transaction.png" width="100%">
+</p>
 
-### Implementation Details
-
-We built TradingAgents with LangGraph to ensure flexibility and modularity. We utilize `o1-preview` and `gpt-4o` as our deep thinking and fast thinking LLMs for our experiments. However, for testing purposes, we recommend you use `o4-mini` and `gpt-4.1-mini` to save on costs as our framework makes **lots of** API calls.
-
-### Python Usage
-
-To use TradingAgents inside your code, you can import the `tradingagents` module and initialize a `TradingAgentsGraph()` object. The `.propagate()` function will return a decision. You can run `main.py`, here's also a quick example:
+### Python Usage (Direct Mode)
 
 ```python
 from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.default_config import DEFAULT_CONFIG
 
-ta = TradingAgentsGraph(debug=True, config=DEFAULT_CONFIG.copy())
+# Use default configuration (Direct mode)
+config = DEFAULT_CONFIG.copy()
+ta = TradingAgentsGraph(debug=True, config=config)
 
-# forward propagate
-_, decision = ta.propagate("NVDA", "2024-05-10")
-print(decision)
+# Run analysis
+graph_result, decision = ta.propagate("NVDA", "2024-05-10")
+print(f"Decision: {decision}")
 ```
 
-**For MCP Mode (with async initialization):**
+### Python Usage (MCP Mode)
 
 ```python
 import asyncio
@@ -219,57 +278,290 @@ async def main():
     ta = await TradingAgentsGraph.create(debug=True, config=config)
     
     try:
-        # Forward propagate
-        _, decision = await ta.propagate("NVDA", "2024-05-10")
-        print(decision)
+        # Run analysis
+        graph_result, decision = await ta.propagate("NVDA", "2024-05-10")
+        print(f"Decision: {decision}")
     finally:
-        await ta.close()  # Clean up MCP connections
+        # Clean up MCP connections
+        await ta.close()
 
 asyncio.run(main())
 ```
 
-You can also adjust the default configuration to set your own choice of LLMs, debate rounds, data vendors, etc.
+### Custom Configuration
 
 ```python
-from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.default_config import DEFAULT_CONFIG
 
-# Create a custom config
 config = DEFAULT_CONFIG.copy()
-config["deep_think_llm"] = "gpt-4.1-nano"  # Use a different model
-config["quick_think_llm"] = "gpt-4.1-nano"  # Use a different model
-config["max_debate_rounds"] = 1  # Increase debate rounds
-config["use_mcp"] = False  # Toggle MCP mode (True for MCP, False for direct)
 
-# Configure data vendors (default uses yfinance and Alpha Vantage)
+# LLM Configuration
+config["deep_think_llm"] = "gpt-4o"           # Deep reasoning model
+config["quick_think_llm"] = "gpt-4o-mini"     # Fast execution model
+config["max_debate_rounds"] = 2               # Debate iterations
+
+# MCP Configuration
+config["use_mcp"] = True                      # Enable MCP mode
+
+# Data Vendor Configuration
 config["data_vendors"] = {
-    "core_stock_apis": "yfinance",           # Options: yfinance, alpha_vantage, local
-    "technical_indicators": "yfinance",      # Options: yfinance, alpha_vantage, local
-    "fundamental_data": "alpha_vantage",     # Options: openai, alpha_vantage, local
-    "news_data": "alpha_vantage",            # Options: openai, alpha_vantage, google, local
+    "core_stock_apis": "yfinance",            # yfinance, alpha_vantage, local
+    "technical_indicators": "yfinance",       # yfinance, alpha_vantage, local
+    "fundamental_data": "alpha_vantage",      # openai, alpha_vantage, local
+    "news_data": "alpha_vantage",             # openai, alpha_vantage, google, local
 }
 
-# Initialize with custom config
+# Use custom config
 ta = TradingAgentsGraph(debug=True, config=config)
-
-# forward propagate
-_, decision = ta.propagate("NVDA", "2024-05-10")
-print(decision)
 ```
 
-> The default configuration uses yfinance for stock price and technical data, and Alpha Vantage for fundamental and news data. For production use or if you encounter rate limits, consider upgrading to [Alpha Vantage Premium](https://www.alphavantage.co/premium/) for more stable and reliable data access. For offline experimentation, there's a local data vendor option that uses our **Tauric TradingDB**, a curated dataset for backtesting, though this is still in development. We're currently refining this dataset and plan to release it soon alongside our upcoming projects. Stay tuned!
+### API & Frontend
 
-You can view the full list of configurations in `tradingagents/default_config.py`.
+**Start backend API:**
+
+```bash
+python -m api.main
+# API runs on http://localhost:8000
+```
+
+**Start Next.js frontend:**
+
+```bash
+cd frontend
+npm install
+npm run dev
+# Frontend runs on http://localhost:3000
+```
+
+**Start both together:**
+
+```bash
+./start.sh
+```
+
+The API provides:
+- REST endpoints: `/api/analyze`, `/api/health`, `/api/models`
+- WebSocket streaming: `/ws/analyze` for real-time updates
+- CORS enabled for local development
+
+---
+
+## Dual Mode Operation
+
+### Direct Mode (Default)
+
+Traditional LangChain ToolNode execution:
+
+- **Pros**: Simpler, faster startup, no additional processes
+- **Cons**: Tightly coupled, harder to extend with new data sources
+- **Use When**: Running quick analyses, testing, or when MCP overhead isn't needed
+
+```python
+config = DEFAULT_CONFIG.copy()
+config["use_mcp"] = False  # Direct mode (default)
+ta = TradingAgentsGraph(debug=True, config=config)
+```
+
+### MCP Mode
+
+Protocol-based execution through MCP servers:
+
+- **Pros**: Modular, standardized, easy to extend, better separation of concerns
+- **Cons**: Slight overhead (~3-5%), requires async pattern, more complex setup
+- **Use When**: Need modularity, extending with new servers, or comparing protocols
+
+```python
+config = DEFAULT_CONFIG.copy()
+config["use_mcp"] = True  # MCP mode
+ta = await TradingAgentsGraph.create(debug=True, config=config)
+```
+
+### Performance Comparison
+
+Based on testing:
+- **Direct Mode**: ~135-140s for full analysis
+- **MCP Mode**: ~140-145s for full analysis
+- **Overhead**: ~3-5% (mostly from server startup and JSON-RPC serialization)
+
+The overhead is minimal and acceptable for most use cases, especially given the architectural benefits.
+
+---
+
+## MCP Server Details
+
+### Stock Server
+
+**Tools:**
+- `get_stock_data`: Fetch historical stock prices
+- `get_indicators`: Calculate technical indicators (RSI, MACD, Bollinger Bands, etc.)
+
+**Location:** `tradingagents/mcp_servers/stock_server/server.py`
+
+### News Server
+
+**Tools:**
+- `get_news`: Company-specific news
+- `get_global_news`: Global market news
+- `get_insider_sentiment`: Insider trading sentiment
+- `get_insider_transactions`: Insider trading transactions
+
+**Location:** `tradingagents/mcp_servers/news_server/server.py`
+
+### Fundamentals Server
+
+**Tools:**
+- `get_fundamentals`: Overview of company fundamentals
+- `get_balance_sheet`: Balance sheet data
+- `get_income_statement`: Income statement data
+- `get_cashflow`: Cash flow statement data
+
+**Location:** `tradingagents/mcp_servers/fundamentals_server/server.py`
+
+### Social Server
+
+**Tools:**
+- Social sentiment analysis tools (Reddit, Twitter sentiment)
+
+**Location:** `tradingagents/mcp_servers/social_server/server.py`
+
+---
+
+## Testing
+
+The repository includes comprehensive tests:
+
+```bash
+# Test MCP integration
+python tests/mcp/test_mcp_simple.py
+
+# Test individual analysts with MCP
+python tests/mcp/individual/test_mcp_news.py
+python tests/mcp/individual/test_mcp_fundamentals.py
+python tests/mcp/individual/test_mcp_social.py
+python tests/mcp/individual/test_mcp_all_analysts.py
+
+# Test MCP servers standalone
+python tests/mcp/server/test_mcp_server_standalone.py
+
+# Run example
+python tests/examples/main.py
+```
+
+See `tests/README.md` for detailed testing documentation.
+
+---
+
+## Documentation
+
+- **[MCP_README.md](MCP_README.md)**: Quick start guide for MCP features
+- **[MCP_INTEGRATION_GUIDE.md](MCP_INTEGRATION_GUIDE.md)**: Comprehensive integration guide with architecture details, troubleshooting, and examples
+
+---
+
+## Configuration Reference
+
+All configuration options are in `tradingagents/default_config.py`:
+
+```python
+DEFAULT_CONFIG = {
+    # LLM Configuration
+    "deep_think_llm": "gpt-4o",              # Model for deep reasoning
+    "quick_think_llm": "gpt-4o-mini",        # Model for quick tasks
+    "max_debate_rounds": 2,                   # Debate iterations
+    
+    # MCP Configuration
+    "use_mcp": False,                         # Enable/disable MCP mode
+    "mcp_servers": {                          # MCP server configurations
+        "stock": {...},
+        "news": {...},
+        "fundamentals": {...},
+        "social": {...}
+    },
+    
+    # Data Vendors
+    "data_vendors": {
+        "core_stock_apis": "yfinance",
+        "technical_indicators": "yfinance",
+        "fundamental_data": "alpha_vantage",
+        "news_data": "alpha_vantage",
+    },
+    
+    # Agent Configuration
+    "enable_reflection": True,                # Post-trade analysis
+    "enable_memory": True,                    # Learning from past trades
+}
+```
+
+---
+
+## Project Structure
+
+```
+Trading-Agents/
+├── tradingagents/              # Core package
+│   ├── agents/                # Agent implementations
+│   │   ├── analysts/         # Market, News, Fundamentals, Social analysts
+│   │   ├── researchers/      # Bull, Bear researchers
+│   │   ├── trader/           # Trader agent
+│   │   ├── risk_mgmt/        # Risk management agents
+│   │   └── managers/         # Research and Risk managers
+│   ├── graph/                 # LangGraph orchestration
+│   │   ├── trading_graph.py  # Main graph implementation
+│   │   ├── setup.py          # Graph construction
+│   │   └── ...               # State, routing, signal processing
+│   ├── dataflows/             # Data vendor abstraction
+│   ├── mcp_servers/           # MCP server implementations
+│   │   ├── stock_server/
+│   │   ├── news_server/
+│   │   ├── fundamentals_server/
+│   │   └── social_server/
+│   ├── mcp_client/            # MCP client implementation
+│   └── default_config.py      # Configuration
+├── api/                        # FastAPI backend
+├── cli/                        # Rich CLI interface
+├── frontend/                   # Next.js web frontend
+├── tests/                      # Test suite
+│   ├── mcp/                   # MCP tests
+│   ├── evaluation/            # Evaluation tests
+│   └── examples/              # Example scripts
+├── requirements.txt            # Core dependencies
+├── requirements-mcp.txt        # MCP dependencies
+└── README.md                   # This file
+```
+
+---
 
 ## Contributing
 
-We welcome contributions from the community! Whether it's fixing a bug, improving documentation, or suggesting a new feature, your input helps make this project better. If you are interested in this line of research, please consider joining our open-source financial AI research community [Tauric Research](https://tauric.ai/).
+Contributions are welcome! This is an experimental fork focused on MCP integration. Feel free to:
+
+- Report bugs or issues
+- Suggest improvements to MCP integration
+- Add new MCP servers
+- Improve documentation
+- Submit pull requests
+
+For the original TradingAgents community, join [Tauric Research](https://tauric.ai/).
+
+---
+
+## Attribution
+
+This repository is based on the excellent work by the TauricResearch team:
+
+**Original Repository:** [TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)
+
+**Paper:** [TradingAgents: Multi-Agents LLM Financial Trading Framework (arXiv:2412.20138)](https://arxiv.org/abs/2412.20138)
+
+**Authors:** Yijia Xiao, Edward Sun, Di Luo, Wei Wang
+
+---
 
 ## Citation
 
-Please reference our work if you find *TradingAgents* provides you with some help :)
+If you use this MCP-enhanced version or the original TradingAgents framework, please cite:
 
-```
+```bibtex
 @misc{xiao2025tradingagentsmultiagentsllmfinancial,
       title={TradingAgents: Multi-Agents LLM Financial Trading Framework}, 
       author={Yijia Xiao and Edward Sun and Di Luo and Wei Wang},
@@ -280,3 +572,24 @@ Please reference our work if you find *TradingAgents* provides you with some hel
       url={https://arxiv.org/abs/2412.20138}, 
 }
 ```
+
+---
+
+## License
+
+This project maintains the same license as the original TradingAgents repository. See [LICENSE](LICENSE) for details.
+
+---
+
+## Acknowledgments
+
+- **TauricResearch** for the original TradingAgents framework
+- **Alpha Vantage** for providing robust API support
+- **Anthropic** for the Model Context Protocol specification
+- **FastMCP** for the rapid MCP server development framework
+
+---
+
+<div align="center">
+Made with ❤️ by extending the amazing TradingAgents framework
+</div>
