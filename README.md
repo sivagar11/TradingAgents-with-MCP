@@ -580,6 +580,3 @@ This project maintains the same license as the original TradingAgents repository
 
 ---
 
-<div align="center">
-Made with ❤️ by extending the amazing TradingAgents framework
-</div>
