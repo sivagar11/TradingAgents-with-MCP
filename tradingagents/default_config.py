@@ -1,13 +1,17 @@
 import os
+import sys
+
+PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "."))
+DEFAULT_RESULTS_DIR = os.path.join(PROJECT_DIR, "results")
+DEFAULT_DATA_DIR = os.path.join(PROJECT_DIR, "data")
+DEFAULT_DATA_CACHE_DIR = os.path.join(PROJECT_DIR, "dataflows/data_cache")
+PYTHON_CMD = os.getenv("TRADINGAGENTS_PYTHON", sys.executable)
 
 DEFAULT_CONFIG = {
-    "project_dir": os.path.abspath(os.path.join(os.path.dirname(__file__), ".")),
-    "results_dir": os.getenv("TRADINGAGENTS_RESULTS_DIR", "./results"),
-    "data_dir": "/Users/yluo/Documents/Code/ScAI/FR1-data",
-    "data_cache_dir": os.path.join(
-        os.path.abspath(os.path.join(os.path.dirname(__file__), ".")),
-        "dataflows/data_cache",
-    ),
+    "project_dir": PROJECT_DIR,
+    "results_dir": os.getenv("TRADINGAGENTS_RESULTS_DIR", DEFAULT_RESULTS_DIR),
+    "data_dir": os.getenv("TRADINGAGENTS_DATA_DIR", DEFAULT_DATA_DIR),
+    "data_cache_dir": os.getenv("TRADINGAGENTS_DATA_CACHE_DIR", DEFAULT_DATA_CACHE_DIR),
     # LLM settings
     "llm_provider": "openai",
     "deep_think_llm": "gpt-4o-mini",  # Use fast model instead of o4-mini
@@ -35,32 +39,40 @@ DEFAULT_CONFIG = {
     "mcp_servers": {
         # MCP server configurations (only used if use_mcp=True)
         "stock": {
-            "command": "python",
-            "args": [os.path.join(
-                os.path.abspath(os.path.join(os.path.dirname(__file__), ".")),
-                "mcp_servers/stock_server/server.py"
-            )]
+            "command": PYTHON_CMD,
+            "args": [
+                os.path.join(
+                    PROJECT_DIR,
+                    "mcp_servers/stock_server/server.py"
+                )
+            ]
         },
         "news": {
-            "command": "python",
-            "args": [os.path.join(
-                os.path.abspath(os.path.join(os.path.dirname(__file__), ".")),
-                "mcp_servers/news_server/server.py"
-            )]
+            "command": PYTHON_CMD,
+            "args": [
+                os.path.join(
+                    PROJECT_DIR,
+                    "mcp_servers/news_server/server.py"
+                )
+            ]
         },
         "fundamentals": {
-            "command": "python",
-            "args": [os.path.join(
-                os.path.abspath(os.path.join(os.path.dirname(__file__), ".")),
-                "mcp_servers/fundamentals_server/server.py"
-            )]
+            "command": PYTHON_CMD,
+            "args": [
+                os.path.join(
+                    PROJECT_DIR,
+                    "mcp_servers/fundamentals_server/server.py"
+                )
+            ]
         },
         "social": {
-            "command": "python",
-            "args": [os.path.join(
-                os.path.abspath(os.path.join(os.path.dirname(__file__), ".")),
-                "mcp_servers/social_server/server.py"
-            )]
+            "command": PYTHON_CMD,
+            "args": [
+                os.path.join(
+                    PROJECT_DIR,
+                    "mcp_servers/social_server/server.py"
+                )
+            ]
         },
     },
     "mcp_tool_mapping": {

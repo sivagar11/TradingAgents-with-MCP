@@ -240,17 +240,22 @@ The CLI provides an interactive interface to:
 ### Python Usage (Direct Mode)
 
 ```python
+import asyncio
 from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.default_config import DEFAULT_CONFIG
 
-# Use default configuration (Direct mode)
-config = DEFAULT_CONFIG.copy()
-ta = TradingAgentsGraph(debug=True, config=config)
+async def main():
+    # Use default configuration (Direct mode)
+    config = DEFAULT_CONFIG.copy()
+    ta = TradingAgentsGraph(debug=True, config=config)
 
-# Run analysis
-graph_result, decision = ta.propagate("NVDA", "2024-05-10")
-print(f"Decision: {decision}")
+    graph_result, decision = await ta.propagate("NVDA", "2024-05-10")
+    print(f"Decision: {decision}")
+
+asyncio.run(main())
 ```
+
+> **Tip:** `TradingAgentsGraph.propagate()` is asynchronous in both direct and MCP modes, so wrap it with `asyncio.run` (or your own event loop) even when MCP is disabled.
 
 ### Python Usage (MCP Mode)
 
@@ -281,28 +286,41 @@ asyncio.run(main())
 ### Custom Configuration
 
 ```python
+import asyncio
+from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.default_config import DEFAULT_CONFIG
 
-config = DEFAULT_CONFIG.copy()
+async def main():
+    config = DEFAULT_CONFIG.copy()
 
-# LLM Configuration
-config["deep_think_llm"] = "gpt-4o"           # Deep reasoning model
-config["quick_think_llm"] = "gpt-4o-mini"     # Fast execution model
-config["max_debate_rounds"] = 2               # Debate iterations
+    # LLM Configuration
+    config["deep_think_llm"] = "gpt-4o"           # Deep reasoning model
+    config["quick_think_llm"] = "gpt-4o-mini"     # Fast execution model
+    config["max_debate_rounds"] = 2               # Debate iterations
 
-# MCP Configuration
-config["use_mcp"] = True                      # Enable MCP mode
+    # MCP Configuration
+    config["use_mcp"] = True                      # Enable MCP mode
 
-# Data Vendor Configuration
-config["data_vendors"] = {
-    "core_stock_apis": "yfinance",            # yfinance, alpha_vantage, local
-    "technical_indicators": "yfinance",       # yfinance, alpha_vantage, local
-    "fundamental_data": "alpha_vantage",      # openai, alpha_vantage, local
-    "news_data": "alpha_vantage",             # openai, alpha_vantage, google, local
-}
+    # Data Vendor Configuration
+    config["data_vendors"] = {
+        "core_stock_apis": "yfinance",            # yfinance, alpha_vantage, local
+        "technical_indicators": "yfinance",       # yfinance, alpha_vantage, local
+        "fundamental_data": "alpha_vantage",      # openai, alpha_vantage, local
+        "news_data": "alpha_vantage",             # openai, alpha_vantage, google, local
+    }
 
-# Use custom config
-ta = TradingAgentsGraph(debug=True, config=config)
+    if config["use_mcp"]:
+        ta = await TradingAgentsGraph.create(debug=True, config=config)
+    else:
+        ta = TradingAgentsGraph(debug=True, config=config)
+
+    try:
+        graph_result, decision = await ta.propagate("NVDA", "2024-05-10")
+        print(decision)
+    finally:
+        await ta.close()
+
+asyncio.run(main())
 ```
 
 ### API & Frontend
@@ -482,6 +500,26 @@ DEFAULT_CONFIG = {
 }
 ```
 
+### Configuring paths
+
+The default configuration now resolves every path relative to the repository, so it works on any machine out-of-the-box. You can still override them with environment variables:
+
+| Variable | Purpose | Default |
+| --- | --- | --- |
+| `TRADINGAGENTS_DATA_DIR` | Location of cached market/news/fundamental datasets (used by `dataflows/local.py`) | `<repo>/tradingagents/data` |
+| `TRADINGAGENTS_DATA_CACHE_DIR` | Cache directory for downloaded vendor payloads | `<repo>/tradingagents/dataflows/data_cache` |
+| `TRADINGAGENTS_RESULTS_DIR` | Destination for logs + evaluation outputs | `<repo>/tradingagents/results` |
+| `TRADINGAGENTS_PYTHON` | Interpreter for starting MCP stdio servers | current Python executable |
+
+Example:
+
+```bash
+export TRADINGAGENTS_DATA_DIR=$HOME/trading-data
+export TRADINGAGENTS_PYTHON=$(pyenv which python)
+```
+
+Set these before running the CLI, API, or tests to point at your own datasets or virtual environments.
+
 ---
 
 ## Project Structure
@@ -579,4 +617,3 @@ This project maintains the same license as the original TradingAgents repository
 - **FastMCP** for the rapid MCP server development framework
 
 ---
-
