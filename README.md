@@ -352,6 +352,30 @@ The API provides:
 - WebSocket streaming: `/ws/analyze` for real-time updates
 - CORS enabled for local development
 
+### API Docker Image
+
+Build and run the backend in a container (no Node/CLI required):
+
+```bash
+# Build image
+docker build -t tradingagents-api .
+
+# Run API (loads env vars from .env)
+docker run --rm -p 8000:8000 --env-file .env tradingagents-api
+```
+
+Mount volumes if you keep cached datasets outside the image:
+
+```bash
+docker run --rm -p 8000:8000 \
+  --env-file .env \
+  -v $HOME/trading-data:/data \
+  -e TRADINGAGENTS_DATA_DIR=/data \
+  tradingagents-api
+```
+
+The container exposes `http://localhost:8000` just like the local dev server.
+
 ---
 
 ## Dual Mode Operation
